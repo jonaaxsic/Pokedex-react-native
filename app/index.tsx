@@ -14,7 +14,7 @@ export default function WelcomeScreen() {
       
       {/* Fondo */}
       <Image
-        source={require('../assets/images/fondoindex.png')}
+        source={require('../assets/images/fondoprincipal.png')}
         style={styles.background}
         resizeMode="cover"
       />
