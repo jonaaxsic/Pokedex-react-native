@@ -1,4 +1,3 @@
-// app/(tabs)/_layout.tsx
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +15,7 @@ export default function TabLayout() {
           paddingTop: 6,
           borderTopWidth: 1,
           borderTopColor: '#F3F4F6',
+          backgroundColor: '#FFFFFF',
         },
       }}
     >
@@ -29,11 +29,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="pokedex"
+        options={{
+          title: 'Pokédex',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'list' : 'list-outline'} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="favorites"
         options={{
           title: 'Favoritos',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={22} color={color} />
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -43,6 +52,15 @@ export default function TabLayout() {
           title: 'Perfil',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="battle"
+        options={{
+          title: 'Battle',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'flash' : 'flash-outline'} size={22} color={color} />
           ),
         }}
       />
