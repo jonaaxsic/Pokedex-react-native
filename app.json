@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Pokedex-app",
-    "slug": "Pokedex-app",
+    "slug": "pokedex-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -41,9 +41,7 @@
     },
     "extra": {
       "router": {},
-      "eas": {
-        "projectId": "cb2a8bc6-a4fb-4bee-86d1-f8254a21c119"
-      }
+      "eas": {}
     }
   }
 }
