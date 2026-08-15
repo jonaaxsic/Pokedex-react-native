@@ -17,7 +17,7 @@ import { useFavorites } from '../../favorites/hooks/useFavorites';
 import { colors } from '../../../theme/colors';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const AVATAR_SIZE = 64;
+const AVATAR_SIZE = 52;
 const AVATAR_GAP = 16;
 
 const avatarOptions = [
@@ -324,9 +324,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   avatarCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
