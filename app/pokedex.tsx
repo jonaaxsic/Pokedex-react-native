@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from '../src/shared/components/SearchBar';
 import PokemonCard from '../src/features/pokedex/components/PokemonCard';
+import PokemonDetailModal from '../src/features/pokedex/components/PokemonDetailModal';
 import { usePokedex } from '../src/features/pokedex/hooks/usePokedex';
 import { useFavorites } from '../src/features/favorites/hooks/useFavorites';
 import { colors } from '../src/theme/colors';
@@ -20,6 +21,7 @@ import { Pokemon } from '../src/core/models/Pokemon';
 export default function PokedexScreen() {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const {
     loading,
     loadingMore,
@@ -101,6 +103,7 @@ export default function PokedexScreen() {
               pokemon={item}
               isFavorite={isFavorite(item.id)}
               onToggleFavorite={toggleFavorite}
+              onPress={() => setSelectedPokemon(item)}
             />
           )}
           ListEmptyComponent={
@@ -116,6 +119,13 @@ export default function PokedexScreen() {
           }
         />
       )}
+
+      {/* Detail Modal */}
+      <PokemonDetailModal
+        pokemon={selectedPokemon}
+        visible={selectedPokemon !== null}
+        onClose={() => setSelectedPokemon(null)}
+      />
     </SafeAreaView>
   );
 }

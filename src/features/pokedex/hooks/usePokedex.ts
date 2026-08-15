@@ -24,7 +24,9 @@ export function usePokedex() {
     pokemonRepository
       .getFirstN(151) // Load all Gen 1 Pokemon
       .then((result) => {
-        setAllPokemon(result);
+        // Sort by rawId to ensure sequential order (001, 002, 003...)
+        const sorted = result.sort((a, b) => a.rawId - b.rawId);
+        setAllPokemon(sorted);
       })
       .catch((e) => {
         setError(e.message ?? 'Error al cargar Pokemon');
@@ -38,17 +40,11 @@ export function usePokedex() {
   const loadMore = useCallback(() => {
     if (loadingMore) return;
     setLoadingMore(true);
-    // Simulate a small delay for UX
     setTimeout(() => {
       setDisplayedCount((prev) => prev + LOAD_MORE_COUNT);
       setLoadingMore(false);
     }, 300);
   }, [loadingMore]);
-
-  // Reset displayed count when searching
-  const resetDisplayedCount = useCallback(() => {
-    setDisplayedCount(allPokemon.length);
-  }, [allPokemon.length]);
 
   // Search filter - supports name, id, and partial matching
   const searchPokemon = useCallback(
@@ -91,6 +87,5 @@ export function usePokedex() {
     displayedCount,
     loadMore,
     getDisplayedPokemon,
-    resetDisplayedCount,
   };
 }

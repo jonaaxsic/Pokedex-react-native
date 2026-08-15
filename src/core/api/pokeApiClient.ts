@@ -10,6 +10,10 @@ export interface PokeApiRawResponse {
     };
   };
   types: { type: { name: string } }[];
+  stats: { base_stat: number; stat: { name: string } }[];
+  moves: { move: { name: string } }[];
+  height: number;
+  weight: number;
 }
 
 export async function getRawPokemon(
@@ -18,7 +22,7 @@ export async function getRawPokemon(
   const res = await fetch(`${BASE_URL}/${idOrName}`);
   if (!res.ok) {
     throw new Error(
-      `No se pudo obtener el Pokémon "${idOrName}" (status ${res.status})`
+      `No se pudo obtener el Pokemon "${idOrName}" (status ${res.status})`
     );
   }
   return res.json();

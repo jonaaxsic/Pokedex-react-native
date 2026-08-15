@@ -16,6 +16,7 @@ interface Props {
   pokemon: Pokemon;
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
+  onPress?: () => void;
 }
 
 const { width } = Dimensions.get("window");
@@ -25,18 +26,26 @@ export default function PokemonCard({
   pokemon,
   isFavorite,
   onToggleFavorite,
+  onPress,
 }: Props) {
   const mainType = pokemon.types[0];
   const accentColor = TYPE_COLORS[mainType] ?? "#A8A29E";
 
   return (
-    <View style={[styles.card, { width: CARD_WIDTH }]}>
+    <TouchableOpacity
+      style={[styles.card, { width: CARD_WIDTH }]}
+      onPress={onPress}
+      activeOpacity={0.85}
+    >
       <View style={styles.topArea}>
         <View style={styles.idPill}>
           <Text style={styles.idText}>{pokemon.id}</Text>
         </View>
         <TouchableOpacity
-          onPress={() => onToggleFavorite(pokemon.id)}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            onToggleFavorite(pokemon.id);
+          }}
           style={styles.heart}
         >
           <Ionicons
@@ -61,7 +70,7 @@ export default function PokemonCard({
         <Text style={styles.name}>{pokemon.name}</Text>
         <TypeBadge types={pokemon.types} />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
