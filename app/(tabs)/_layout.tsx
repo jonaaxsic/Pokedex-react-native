@@ -1,22 +1,31 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors } from '../../src/theme/colors';
+import { useComingSoon } from '../../src/shared/context/ComingSoonContext';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  const { show } = useComingSoon();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#EF4444',
+        tabBarActiveTintColor: colors.red,
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
-          height: 80,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-          paddingTop: 6,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+          paddingTop: 8,
           borderTopWidth: 1,
-          borderTopColor: '#F3F4F6',
-          backgroundColor: '#FFFFFF',
+          borderTopColor: colors.border,
+          backgroundColor: colors.white,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
         },
       }}
     >
@@ -25,7 +34,7 @@ export default function TabLayout() {
         options={{
           title: 'Inicio',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -34,7 +43,7 @@ export default function TabLayout() {
         options={{
           title: 'Favoritos',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -43,8 +52,23 @@ export default function TabLayout() {
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="proximamente"
+        options={{
+          title: 'Proximamente',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="lock-closed-outline" size={22} color={color} />
+          ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            show();
+          },
         }}
       />
     </Tabs>

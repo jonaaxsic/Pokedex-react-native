@@ -52,9 +52,6 @@ function RootLayoutNav() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="pokedex" options={{ headerShown: false }} />
-          <Stack.Screen name="favorites" options={{ headerShown: false }} />
-          <Stack.Screen name="profile" options={{ headerShown: false }} />
-          <Stack.Screen name="battle" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </AppProviders>
