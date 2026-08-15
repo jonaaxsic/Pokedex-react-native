@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,17 +10,12 @@ export default function PokedexMenuScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Header con botón volver */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Pokédex</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      {/* Fondo */}
+      <Image
+        source={require('../../assets/images/fondo-otros.png')}
+        style={styles.background}
+        resizeMode="cover"
+      />
 
       <View style={styles.content}>
         {/* Logo */}
@@ -31,7 +25,19 @@ export default function PokedexMenuScreen() {
           resizeMode="contain"
         />
 
-        {/* Opciones */}
+        {/* Título */}
+        <Image
+          source={require('../../assets/images/titulo_logo.png')}
+          style={styles.title}
+          resizeMode="contain"
+        />
+
+        {/* Mensaje */}
+        <Text style={styles.message}>
+          Selecciona una opción
+        </Text>
+
+        {/* Opciones como botones funcionales */}
         <View style={styles.options}>
           <TouchableOpacity
             style={styles.optionButton}
@@ -43,10 +49,10 @@ export default function PokedexMenuScreen() {
 
           <TouchableOpacity
             style={styles.optionButton}
-            onPress={() => router.push('/favorites')}
+            onPress={() => router.push('/battle')}
           >
-            <Ionicons name="heart" size={32} color="#EF4444" />
-            <Text style={styles.optionText}>Ver Favoritos</Text>
+            <Ionicons name="flash" size={32} color="#F59E0B" />
+            <Text style={styles.optionText}>Batalla</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -59,37 +65,33 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 40,
+  background: {
+    position: 'absolute',
+    width: width,
+    height: '100%',
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
+    paddingTop: 32,
   },
   logo: {
     width: 100,
     height: 100,
-    marginBottom: 40,
+    marginBottom: 16,
+  },
+  title: {
+    width: 240,
+    height: 70,
+    marginBottom: 24,
+  },
+  message: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 16,
   },
   options: {
     gap: 16,
@@ -103,6 +105,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   optionText: {
     fontSize: 18,

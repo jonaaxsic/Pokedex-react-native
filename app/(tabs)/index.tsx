@@ -1,21 +1,27 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, Image, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeTabScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Fondo */}
+      <Image
+        source={require('../../assets/images/fondo-otros.png')}
+        style={styles.background}
+        resizeMode="cover"
+      />
+
       <View style={styles.content}>
-        {/* Logo */}
+        {/* Logo arriba */}
         <Image
           source={require('../../assets/images/logoindex.png')}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {/* Título */}
+        {/* Título debajo del logo */}
         <Image
           source={require('../../assets/images/titulo_logo.png')}
           style={styles.title}
@@ -26,26 +32,6 @@ export default function HomeTabScreen() {
         <Text style={styles.message}>
           Selecciona una opción del menú inferior
         </Text>
-
-        {/* Opciones */}
-        <View style={styles.options}>
-          <View style={styles.option}>
-            <Text style={styles.optionIcon}>📋</Text>
-            <Text style={styles.optionText}>Pokédex</Text>
-          </View>
-          <View style={styles.option}>
-            <Text style={styles.optionIcon}>❤️</Text>
-            <Text style={styles.optionText}>Favoritos</Text>
-          </View>
-          <View style={styles.option}>
-            <Text style={styles.optionIcon}>👤</Text>
-            <Text style={styles.optionText}>Perfil</Text>
-          </View>
-          <View style={styles.option}>
-            <Text style={styles.optionIcon}>⚔️</Text>
-            <Text style={styles.optionText}>Battle</Text>
-          </View>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -56,48 +42,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  background: {
+    position: 'absolute',
+    width: width,
+    height: '100%',
+  },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 32,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     marginBottom: 16,
   },
   title: {
     width: 240,
     height: 70,
-    marginBottom: 40,
+    marginBottom: 24,
   },
   message: {
     fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 40,
-  },
-  options: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 16,
-  },
-  option: {
-    width: (width - 80) / 2 - 8,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-  optionIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  optionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    marginTop: 24,
+    paddingHorizontal: 16,
   },
 });

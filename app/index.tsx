@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
@@ -9,7 +9,7 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
       
       {/* Fondo */}
@@ -21,19 +21,22 @@ export default function WelcomeScreen() {
 
       {/* Contenido */}
       <View style={styles.content}>
-        {/* Logo */}
+        {/* Título arriba */}
+        <Image
+          source={require('../assets/images/titulo_logo.png')}
+          style={styles.title}
+          resizeMode="contain"
+        />
+
+        {/* Logo debajo del título */}
         <Image
           source={require('../assets/images/logoindex.png')}
           style={styles.logo}
           resizeMode="contain"
         />
 
-        {/* Título */}
-        <Image
-          source={require('../assets/images/titulo_logo.png')}
-          style={styles.title}
-          resizeMode="contain"
-        />
+        {/* Espaciador flexible para empujar el botón hacia abajo */}
+        <View style={styles.spacer} />
 
         {/* Botón Entrar */}
         <TouchableOpacity
@@ -44,7 +47,7 @@ export default function WelcomeScreen() {
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -60,34 +63,39 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
+    paddingTop: 40,
   },
   title: {
     width: 280,
     height: 80,
-    marginBottom: 60,
+    marginBottom: 20,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+    marginBottom: 20,
+  },
+  spacer: {
+    flex: 1,
+    width: '100%',
   },
   button: {
-    backgroundColor: '#3B82F6',
-    paddingVertical: 16,
-    paddingHorizontal: 60,
-    borderRadius: 30,
+    backgroundColor: '#EF4444',
+    paddingVertical: 18,
+    paddingHorizontal: 80,
+    borderRadius: 35,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    marginBottom: 40,
   },
   buttonText: {
     color: '#FFF',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     letterSpacing: 2,
   },
