@@ -47,6 +47,7 @@ export default function FavoritesScreen() {
           data={favoritePokemon}
           keyExtractor={(item) => item.id}
           numColumns={2}
+          bounces={false}
           columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
           contentContainerStyle={{ paddingBottom: 24 }}
           renderItem={({ item }) => (
