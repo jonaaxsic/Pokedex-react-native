@@ -13,23 +13,23 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#6C5CE7',
+        tabBarActiveTintColor: colors.red,
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarShowLabel: true,
         tabBarStyle: {
           position: 'absolute',
-          left: 20,
-          right: 20,
-          bottom: insets.bottom > 0 ? insets.bottom + 10 : 20,
-          height: 64,
-          borderRadius: 28,
-          backgroundColor: '#F4F5F7',
-          borderTopWidth: 0,
-          shadowColor: '#A3A9B8',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.25,
-          shadowRadius: 16,
-          elevation: 10,
+          left: 0,
+          right: 0,
+          bottom: 8,
+          height: 64 + insets.bottom,
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: '#E5E7EB',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+          elevation: 8,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
@@ -74,7 +74,7 @@ export default function TabLayout() {
         options={{
           title: 'Proximamente',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="lock-closed-outline" size={22} color={color} />
+            <Ionicons name="hourglass-outline" size={22} color={color} />
           ),
         }}
         listeners={{

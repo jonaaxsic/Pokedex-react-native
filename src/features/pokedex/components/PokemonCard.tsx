@@ -33,7 +33,7 @@ export default function PokemonCard({
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: accentColor }]}
       onPress={onPress}
       activeOpacity={0.85}
     >
@@ -41,7 +41,7 @@ export default function PokemonCard({
       <View style={styles.topArea}>
         {/* ID pill */}
         <View style={styles.idPill}>
-          <Text style={styles.idText}>{pokemon.id}</Text>
+          <Text style={[styles.idText, { color: textColor }]}>{pokemon.id}</Text>
         </View>
 
         {/* Heart */}
@@ -55,7 +55,7 @@ export default function PokemonCard({
           <Ionicons
             name={isFavorite ? "heart" : "heart-outline"}
             size={18}
-            color={isFavorite ? "#EF4444" : "#9CA3AF"}
+            color={isFavorite ? "#EF4444" : textColor}
           />
         </TouchableOpacity>
 
@@ -68,9 +68,9 @@ export default function PokemonCard({
       </View>
 
       {/* Bottom area - nombre y tipo */}
-      <View style={[styles.bottomArea, { backgroundColor: accentColor }]}>
+      <View style={styles.bottomArea}>
         <Text style={[styles.name, { color: textColor }]}>{pokemon.name}</Text>
-        <TypeBadge types={pokemon.types} />
+        <TypeBadge types={pokemon.types} textColor={textColor} />
       </View>
     </TouchableOpacity>
   );
@@ -81,25 +81,23 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#F8F9FB",
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    elevation: 5,
   },
   topArea: {
-    backgroundColor: "#F8F9FB",
     paddingTop: 10,
-    paddingBottom: 16,
+    paddingBottom: 12,
     alignItems: "center",
   },
   idPill: {
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "rgba(0,0,0,0.06)",
+    backgroundColor: "rgba(255,255,255,0.3)",
     borderRadius: 10,
     paddingHorizontal: 7,
     paddingVertical: 2,
@@ -107,7 +105,6 @@ const styles = StyleSheet.create({
   idText: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#6B7280",
   },
   heart: {
     position: "absolute",

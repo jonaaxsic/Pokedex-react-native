@@ -14,8 +14,8 @@ import { useRouter } from 'expo-router';
 import { useFavorites } from '../../favorites/hooks/useFavorites';
 import { colors } from '../../../theme/colors';
 
-const AVATAR_SIZE = 48;
-const AVATAR_GAP = 12;
+const AVATAR_SIZE = 60;
+const AVATAR_GAP = 14;
 
 const avatarOptions = [
   { id: 'none', image: null, label: 'Sin avatar' },

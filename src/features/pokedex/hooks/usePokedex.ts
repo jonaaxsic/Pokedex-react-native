@@ -1,119 +1,141 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Pokemon } from '../../../core/models/Pokemon';
-import { pokemonRepository, PokemonRef } from '../../../core/repositories/pokemonRepository';
+import { pokemonRepository } from '../../../core/repositories/pokemonRepository';
+import { searchPokemonRefs } from '../utils/searchPokemon';
+import { usePokemonIndex } from './usePokemonIndex';
 
-const BATCH_SIZE = 20;
-
-export function usePokedex() {
-  const [refs, setRefs] = useState<PokemonRef[]>([]);
+/**
+ * Complete Pokedex hook powered by TanStack Query.
+ *
+ * - Index (all Pokémon refs) is cached globally — 1 request, 30 min fresh.
+ * - First 20 details loaded on mount.
+ * - Search fetches on-demand from the index, then batch-loads only missing details.
+ * - Race conditions handled via abortRef.
+ * - No manual state juggling — query cache is the source of truth.
+ */
+export function usePokedex(query: string = '') {
+  const { data: refs = [], isLoading: indexLoading, error: indexError } = usePokemonIndex();
   const [details, setDetails] = useState<Map<number, Pokemon>>(new Map());
-  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<Pokemon[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const abortRef = useRef(0);
 
-  // 1) Trae el índice completo (1 solo request, rápido)
+  // Load first batch on mount
   useEffect(() => {
-    let cancelled = false;
+    if (refs.length === 0 || loadedCount > 0) return;
+
+    const firstIds = refs.slice(0, 20).map((r) => r.id);
+    setLoadingMore(true);
 
     pokemonRepository
-      .getAllRefs()
-      .then(async (allRefs) => {
-        if (cancelled) return;
-        setRefs(allRefs);
-        // 2) Carga el primer lote de detalle
-        const firstBatch = allRefs.slice(0, BATCH_SIZE).map((r) => r.id);
-        const pokes = await pokemonRepository.getBatch(firstBatch);
-        if (cancelled) return;
+      .getBatch(firstIds)
+      .then((pokes) => {
         setDetails(new Map(pokes.map((p) => [p.rawId, p])));
-        setLoadedCount(BATCH_SIZE);
+        setLoadedCount(20);
       })
-      .catch((e) => {
-        if (!cancelled) setError(e.message ?? 'Error al cargar Pokemon');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      .finally(() => setLoadingMore(false));
+  }, [refs, loadedCount]);
 
-    return () => { cancelled = true; };
-  }, []);
-
-  // 3) loadMore pide el SIGUIENTE lote real a la API
-  const loadMore = useCallback(async () => {
+  // Load more batches
+  const loadMore = async () => {
     if (loadingMore || loadedCount >= refs.length) return;
     setLoadingMore(true);
-    const nextIds = refs.slice(loadedCount, loadedCount + BATCH_SIZE).map((r) => r.id);
+    const nextIds = refs.slice(loadedCount, loadedCount + 20).map((r) => r.id);
     const pokes = await pokemonRepository.getBatch(nextIds);
     setDetails((prev) => {
       const next = new Map(prev);
       pokes.forEach((p) => next.set(p.rawId, p));
       return next;
     });
-    setLoadedCount((prev) => prev + BATCH_SIZE);
+    setLoadedCount((prev) => prev + 20);
     setLoadingMore(false);
-  }, [refs, loadedCount, loadingMore]);
+  };
 
-  // 4) Buscar: si el pokemon ya está en refs pero no tiene detalle, lo pide bajo demanda
-  const searchPokemon = useCallback(
-    async (query: string): Promise<Pokemon[]> => {
-      const q = query.trim().toLowerCase();
-      if (!q) {
-        return Array.from(details.values()).sort((a, b) => a.rawId - b.rawId);
+  // Search with on-demand fetch
+  useEffect(() => {
+    const trimmed = query.trim();
+
+    if (!trimmed) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    if (refs.length === 0) return;
+
+    const thisSearch = ++abortRef.current;
+    setIsSearching(true);
+
+    const matches = searchPokemonRefs(refs, trimmed);
+    if (matches.length === 0) {
+      if (thisSearch === abortRef.current) {
+        setSearchResults([]);
+        setIsSearching(false);
       }
+      return;
+    }
 
-      const cleanQuery = q.replace(/^0+/, '');
-      const matches = refs.filter(
-        (r) => r.name.toLowerCase().includes(q) || r.id.toString() === cleanQuery
-      );
+    // Check which are missing
+    const missing = matches.filter((m) => !details.has(m.id));
 
-      // pide el detalle de los que falten
-      const missing = matches.filter((m) => !details.has(m.id));
-      if (missing.length > 0) {
-        const fetched = await pokemonRepository.getBatch(missing.map((m) => m.id));
+    if (missing.length === 0) {
+      const results = matches.map((m) => details.get(m.id)!);
+      if (thisSearch === abortRef.current) {
+        setSearchResults(results);
+        setIsSearching(false);
+      }
+      return;
+    }
+
+    // Fetch missing
+    pokemonRepository
+      .getBatch(missing.map((m) => m.id))
+      .then((fetched) => {
+        if (thisSearch !== abortRef.current) return;
+
         setDetails((prev) => {
           const next = new Map(prev);
           fetched.forEach((p) => next.set(p.rawId, p));
           return next;
         });
-      }
 
-      return matches
-        .map((m) => details.get(m.id) ?? null)
-        .filter((p): p is Pokemon => p !== null);
-    },
-    [refs, details]
+        const fetchedMap = new Map(fetched.map((p) => [p.rawId, p]));
+        const results = matches
+          .map((m) => fetchedMap.get(m.id) ?? details.get(m.id) ?? null)
+          .filter((p): p is Pokemon => p != null);
+
+        setSearchResults(results);
+        setIsSearching(false);
+      })
+      .catch(() => {
+        if (thisSearch === abortRef.current) {
+          setSearchResults([]);
+          setIsSearching(false);
+        }
+      });
+  }, [query, refs, details]);
+
+  const displayData = useMemo(
+    () =>
+      query.trim()
+        ? searchResults
+        : Array.from(details.values()).sort((a, b) => a.rawId - b.rawId),
+    [query, searchResults, details]
   );
 
-  // 5) Get displayed Pokemon (sync wrapper for FlatList)
-  const getDisplayedPokemon = useCallback(
-    (query: string): Pokemon[] => {
-      const q = query.trim().toLowerCase();
-      if (!q) {
-        return Array.from(details.values()).sort((a, b) => a.rawId - b.rawId);
-      }
-
-      const cleanQuery = q.replace(/^0+/, '');
-      return refs
-        .filter(
-          (r) => r.name.toLowerCase().includes(q) || r.id.toString() === cleanQuery
-        )
-        .map((m) => details.get(m.id))
-        .filter((p): p is Pokemon => p !== null);
-    },
-    [refs, details]
-  );
-
+  const loading = indexLoading;
+  const error = indexError?.message ?? null;
   const hasMore = loadedCount < refs.length;
 
   return {
-    allPokemon: Array.from(details.values()),
     loading,
     loadingMore,
     error,
     hasMore,
-    loadedCount,
     loadMore,
-    searchPokemon,
-    getDisplayedPokemon,
+    displayData,
+    isSearching,
   };
 }

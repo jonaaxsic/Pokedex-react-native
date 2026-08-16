@@ -14,16 +14,14 @@ export default function WelcomeScreen() {
       {/* Background white */}
       <View style={styles.background} />
 
-      {/* Content */}
-      <View style={styles.content}>
-        {/* Pokemon title */}
+      {/* Top content: title + banner + subtitle */}
+      <View style={styles.topContent}>
         <Image
           source={require('../assets/images/pokedex-ui/new-title.png')}
-          style={[styles.title, { width: width * 0.78 }]}
+          style={[styles.title, { width: width * 0.88 }]}
           resizeMode="contain"
         />
 
-        {/* Pokeball banner "POKEDEX" */}
         <View style={styles.banner}>
           <Image
             source={require('../assets/images/icon.png')}
@@ -38,31 +36,27 @@ export default function WelcomeScreen() {
           />
         </View>
 
-        {/* Subtitle */}
         <Text style={styles.subtitle}>Explora el mundo Pokemon</Text>
         <Text style={styles.description}>
           Descubre, captura y conoce a todos los Pokemon.
         </Text>
-
-        {/* Pokeball on grass - subida mas arriba */}
-        <View style={styles.pokeballArea}>
-          <Image
-            source={require('../assets/images/pokedex-ui/pokeball-grass.png')}
-            style={[styles.pokeballGrass, { width: width * 0.65, height: width * 0.55 }]}
-            resizeMode="contain"
-          />
-        </View>
       </View>
 
-      {/* Red separator at bottom - aspectRatio real del asset */}
-      <Image
-        source={require('../assets/images/pokedex-ui/separator-red.png')}
-        style={styles.separator}
-        resizeMode="cover"
-      />
-
-      {/* COMENZAR button over the separator curve */}
-      <View style={[styles.buttonArea, { bottom: height * 0.1 }]}>
+      {/* Bottom section: pokeball sits on the separator curve */}
+      <View style={styles.bottomSection}>
+        {/* Separator as background - curve at bottom */}
+        <Image
+          source={require('../assets/images/pokedex-ui/separator-red.png')}
+          style={styles.separator}
+          resizeMode="contain"
+        />
+        {/* Pokeball positioned just above the curve */}
+        <Image
+          source={require('../assets/images/pokedex-ui/pokeball-grass.png')}
+          style={[styles.pokeballGrass, { width: width * 0.62 }]}
+          resizeMode="contain"
+        />
+        {/* COMENZAR button on the curve */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.replace('/(tabs)')}
@@ -90,15 +84,15 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.white,
   },
-  content: {
-    flex: 1,
+  topContent: {
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingTop: 32,
+    paddingBottom: 12,
   },
   title: {
-    height: 100,
-    marginBottom: 8,
+    height: 180,
+    marginBottom: 12,
   },
   banner: {
     flexDirection: 'row',
@@ -107,7 +101,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    marginBottom: 20,
+    marginBottom: 16,
     gap: 8,
   },
   bannerIcon: {
@@ -132,13 +126,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  pokeballArea: {
+  bottomSection: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-  },
-  pokeballGrass: {
-    marginBottom: 40,
+    justifyContent: 'flex-end',
   },
   separator: {
     position: 'absolute',
@@ -146,13 +137,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: '100%',
-    aspectRatio: 356 / 700,
+    height: 260,
   },
-  buttonArea: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+  pokeballGrass: {
+    marginBottom: -30,
+    zIndex: 1,
   },
   button: {
     backgroundColor: colors.white,
@@ -168,6 +157,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     gap: 10,
     marginBottom: 12,
+    zIndex: 2,
   },
   buttonText: {
     fontSize: 18,
@@ -183,5 +173,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.white,
     fontWeight: '500',
+    zIndex: 2,
+    marginBottom: 40,
   },
 });

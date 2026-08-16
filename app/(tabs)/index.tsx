@@ -163,8 +163,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    width: 260,
-    height: 80,
+    width: 300,
+    height: 100,
     marginBottom: 16,
   },
   welcomeContainer: {
@@ -197,6 +197,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   bottomMessageIcon: {
     width: 18,

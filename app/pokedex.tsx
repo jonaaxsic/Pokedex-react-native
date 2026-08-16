@@ -29,11 +29,10 @@ export default function PokedexScreen() {
     error,
     hasMore,
     loadMore,
-    getDisplayedPokemon,
-  } = usePokedex();
+    displayData,
+    isSearching,
+  } = usePokedex(query);
   const { isFavorite, toggleFavorite } = useFavorites();
-
-  const filtered = useMemo(() => getDisplayedPokemon(query), [query, getDisplayedPokemon]);
 
   const renderFooter = () => {
     if (!hasMore || query.trim()) return null;
@@ -92,7 +91,7 @@ export default function PokedexScreen() {
         </View>
       ) : (
         <FlatList
-          data={filtered}
+          data={displayData}
           keyExtractor={(item) => item.id}
           numColumns={2}
           bounces={false}
@@ -108,15 +107,22 @@ export default function PokedexScreen() {
             />
           )}
           ListEmptyComponent={
-            <View style={styles.center}>
-              <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-              <Text style={styles.emptyText}>
-                No se encontro ningun Pokemon
-              </Text>
-              <Text style={styles.emptySubtext}>
-                Intenta con otro nombre o numero
-              </Text>
-            </View>
+            isSearching ? (
+              <View style={styles.center}>
+                <ActivityIndicator size="large" color={colors.red} />
+                <Text style={styles.loadingText}>Buscando Pokemon...</Text>
+              </View>
+            ) : (
+              <View style={styles.center}>
+                <Ionicons name="search-outline" size={48} color="#D1D5DB" />
+                <Text style={styles.emptyText}>
+                  No se encontro ningun Pokemon
+                </Text>
+                <Text style={styles.emptySubtext}>
+                  Intenta con otro nombre o numero
+                </Text>
+              </View>
+            )
           }
         />
       )}
