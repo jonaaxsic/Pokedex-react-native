@@ -89,23 +89,21 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
         >
           {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Ionicons name="close" size={22} color={textColor} />
+            <Ionicons name="close" size={20} color={textColor} />
           </TouchableOpacity>
 
           {/* Pokemon ID */}
           <Text style={[styles.pokemonId, { color: textColor }]}>{pokemon.id}</Text>
 
-          {/* Pokemon Image */}
+          {/* Pokemon Image - mas compacto */}
           <Image
             source={{ uri: pokemon.image }}
             style={styles.pokemonImage}
             resizeMode="contain"
           />
 
-          {/* Pokemon Name */}
+          {/* Pokemon Name + Types en la misma zona */}
           <Text style={[styles.pokemonName, { color: textColor }]}>{pokemon.name}</Text>
-
-          {/* Types */}
           <View style={styles.typesRow}>
             {pokemon.types.map((type) => (
               <View key={type} style={styles.typeBadge}>
@@ -114,7 +112,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             ))}
           </View>
 
-          {/* Info Row */}
+          {/* Info Row - compacto */}
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={[styles.infoValue, { color: textColor }]}>{pokemon.height}m</Text>
@@ -132,15 +130,10 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             </View>
           </View>
 
-          {/* Stats */}
-          <ScrollView
-            style={styles.statsContainer}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Estadisticas</Text>
+          {/* Stats - grid 2x3 sin scroll */}
+          <View style={styles.statsGrid}>
             {pokemon.stats.map((stat) => (
-              <View key={stat.name} style={styles.statRow}>
-                <Text style={[styles.statName, { color: textColor }]}>{stat.name}</Text>
+              <View key={stat.name} style={styles.statItem}>
                 <Text style={[styles.statValue, { color: textColor }]}>{stat.value}</Text>
                 <View style={[styles.statBarBg, { backgroundColor: textColor }]}>
                   <View
@@ -148,24 +141,27 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
                       styles.statBarFill,
                       {
                         width: `${Math.min((stat.value / 255) * 100, 100)}%`,
-                        backgroundColor: bgColor,
+                        backgroundColor: textColor,
                       },
                     ]}
                   />
                 </View>
+                <Text style={[styles.statName, { color: textColor }]}>{stat.name}</Text>
               </View>
             ))}
+          </View>
 
-            {/* Moves */}
-            <Text style={[styles.sectionTitle, { color: textColor, marginTop: 12 }]}>Movimientos</Text>
+          {/* Moves - compacto, max 2 filas */}
+          <View style={styles.movesSection}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Movimientos</Text>
             <View style={styles.movesContainer}>
-              {pokemon.moves.map((move) => (
+              {pokemon.moves.slice(0, 10).map((move) => (
                 <View key={move.name} style={styles.moveBadge}>
                   <Text style={[styles.moveText, { color: textColor }]}>{move.name}</Text>
                 </View>
               ))}
             </View>
-          </ScrollView>
+          </View>
         </Animated.View>
       </TouchableOpacity>
     </Modal>
@@ -175,18 +171,18 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   card: {
-    width: SCREEN_WIDTH - 48,
-    maxHeight: SCREEN_HEIGHT * 0.75,
-    borderRadius: 24,
-    paddingTop: 40,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
+    width: SCREEN_WIDTH - 40,
+    maxHeight: SCREEN_HEIGHT * 0.8,
+    borderRadius: 20,
+    paddingTop: 36,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
@@ -196,47 +192,48 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    top: 10,
+    right: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
   pokemonId: {
     position: 'absolute',
-    top: 14,
-    left: 16,
-    fontSize: 16,
+    top: 12,
+    left: 14,
+    fontSize: 14,
     fontWeight: '700',
-    opacity: 0.7,
+    opacity: 0.6,
   },
   pokemonImage: {
-    width: 140,
-    height: 140,
-    marginBottom: 8,
+    width: 110,
+    height: 110,
+    marginBottom: 4,
   },
   pokemonName: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    marginBottom: 8,
+    marginBottom: 6,
+    textTransform: 'capitalize',
   },
   typesRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
+    gap: 6,
+    marginBottom: 12,
   },
   typeBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
   typeText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   infoRow: {
@@ -244,10 +241,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    paddingVertical: 12,
-    marginBottom: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
   },
   infoItem: {
     alignItems: 'center',
@@ -255,70 +252,76 @@ const styles = StyleSheet.create({
   },
   infoDivider: {
     width: 1,
-    height: 28,
-    opacity: 0.3,
+    height: 24,
+    opacity: 0.25,
   },
   infoValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
   infoLabel: {
-    fontSize: 11,
-    opacity: 0.8,
-    marginTop: 2,
+    fontSize: 10,
+    opacity: 0.7,
+    marginTop: 1,
   },
-  statsContainer: {
-    width: '100%',
-    maxHeight: 200,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  statRow: {
+  // Stats en grid 2x3 - sin scroll
+  statsGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 12,
   },
-  statName: {
-    width: 80,
-    fontSize: 11,
-    fontWeight: '600',
+  statItem: {
+    width: '48%',
+    marginBottom: 8,
   },
   statValue: {
-    width: 30,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    textAlign: 'right',
-    marginRight: 8,
+    marginBottom: 3,
   },
   statBarBg: {
-    flex: 1,
-    height: 6,
+    height: 5,
     borderRadius: 3,
     overflow: 'hidden',
-    opacity: 0.3,
+    opacity: 0.25,
+    marginBottom: 2,
   },
   statBarFill: {
     height: '100%',
     borderRadius: 3,
+    opacity: 1,
+  },
+  statName: {
+    fontSize: 10,
+    fontWeight: '500',
+    opacity: 0.8,
+  },
+  // Moves compactos
+  movesSection: {
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 6,
+    textAlign: 'center',
   },
   movesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 5,
     justifyContent: 'center',
   },
   moveBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   moveText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });

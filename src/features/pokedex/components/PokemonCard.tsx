@@ -8,10 +8,9 @@ import {
     View,
 } from "react-native";
 import { Pokemon } from "../../../core/models/Pokemon";
-import { TYPE_COLORS } from "../constants/typeStyles";
+import { TYPE_COLORS, TYPE_TEXT_COLORS } from "../constants/typeStyles";
 import TypeBadge from "./TypeBadge";
 
-// interface
 interface Props {
   pokemon: Pokemon;
   isFavorite: boolean;
@@ -30,17 +29,22 @@ export default function PokemonCard({
 }: Props) {
   const mainType = pokemon.types[0];
   const accentColor = TYPE_COLORS[mainType] ?? "#A8A29E";
+  const textColor = TYPE_TEXT_COLORS[mainType] ?? "#FFFFFF";
 
   return (
     <TouchableOpacity
-      style={[styles.card, { width: CARD_WIDTH }]}
+      style={styles.card}
       onPress={onPress}
       activeOpacity={0.85}
     >
+      {/* Top area - imagen y detalles */}
       <View style={styles.topArea}>
+        {/* ID pill */}
         <View style={styles.idPill}>
           <Text style={styles.idText}>{pokemon.id}</Text>
         </View>
+
+        {/* Heart */}
         <TouchableOpacity
           onPress={(e) => {
             e.stopPropagation?.();
@@ -50,10 +54,12 @@ export default function PokemonCard({
         >
           <Ionicons
             name={isFavorite ? "heart" : "heart-outline"}
-            size={20}
-            color={isFavorite ? "#EF4444" : "#374151"}
+            size={18}
+            color={isFavorite ? "#EF4444" : "#9CA3AF"}
           />
         </TouchableOpacity>
+
+        {/* Pokemon image */}
         <Image
           source={{ uri: pokemon.image }}
           style={styles.sprite}
@@ -61,13 +67,9 @@ export default function PokemonCard({
         />
       </View>
 
-      <View style={styles.notchRow}>
-        <View style={[styles.notchLeft, { borderTopColor: "#FFFFFF" }]} />
-        <View style={[styles.notchRight, { borderTopColor: accentColor }]} />
-      </View>
-
+      {/* Bottom area - nombre y tipo */}
       <View style={[styles.bottomArea, { backgroundColor: accentColor }]}>
-        <Text style={styles.name}>{pokemon.name}</Text>
+        <Text style={[styles.name, { color: textColor }]}>{pokemon.name}</Text>
         <TypeBadge types={pokemon.types} />
       </View>
     </TouchableOpacity>
@@ -76,52 +78,56 @@ export default function PokemonCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 20,
+    width: CARD_WIDTH,
+    borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F8F9FB",
     marginBottom: 16,
     shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    elevation: 3,
   },
   topArea: {
-    backgroundColor: "#FFFFFF",
-    paddingTop: 12,
-    paddingBottom: 24,
+    backgroundColor: "#F8F9FB",
+    paddingTop: 10,
+    paddingBottom: 16,
     alignItems: "center",
   },
   idPill: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    top: 8,
+    left: 8,
+    backgroundColor: "rgba(0,0,0,0.06)",
+    borderRadius: 10,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
   },
-  idText: { fontSize: 12, fontWeight: "600", color: "#374151" },
-  heart: { position: "absolute", top: 10, right: 10 },
-  sprite: { width: "75%", height: 110, marginTop: 20 },
-  notchRow: { flexDirection: "row", height: 16 },
-  notchLeft: {
-    flex: 1,
-    borderTopWidth: 16,
-    borderRightWidth: 0,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
+  idText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#6B7280",
   },
-  notchRight: {
-    flex: 1,
-    borderTopWidth: 16,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
+  heart: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+  },
+  sprite: {
+    width: "70%",
+    height: 100,
+    marginTop: 16,
   },
   bottomArea: {
-    paddingTop: 4,
-    paddingBottom: 16,
+    paddingTop: 6,
+    paddingBottom: 14,
     alignItems: "center",
   },
-  name: { fontSize: 17, fontWeight: "700", color: "#111827", marginBottom: 8 },
+  name: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 6,
+    textTransform: "capitalize",
+  },
 });
