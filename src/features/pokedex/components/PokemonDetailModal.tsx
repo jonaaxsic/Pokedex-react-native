@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pokemon } from '../../../core/models/Pokemon';
-import { TYPE_COLORS } from '../constants/typeStyles';
+import { TYPE_COLORS, TYPE_TEXT_COLORS } from '../constants/typeStyles';
 
 interface Props {
   pokemon: Pokemon | null;
@@ -65,6 +65,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
 
   const mainType = pokemon.types[0];
   const bgColor = TYPE_COLORS[mainType] ?? '#A8A29E';
+  const textColor = TYPE_TEXT_COLORS[mainType] ?? '#FFFFFF';
 
   const totalStats = pokemon.stats.reduce((sum, s) => sum + s.value, 0);
 
@@ -88,11 +89,11 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
         >
           {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Ionicons name="close" size={22} color="#FFF" />
+            <Ionicons name="close" size={22} color={textColor} />
           </TouchableOpacity>
 
           {/* Pokemon ID */}
-          <Text style={styles.pokemonId}>{pokemon.id}</Text>
+          <Text style={[styles.pokemonId, { color: textColor }]}>{pokemon.id}</Text>
 
           {/* Pokemon Image */}
           <Image
@@ -102,13 +103,13 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
           />
 
           {/* Pokemon Name */}
-          <Text style={styles.pokemonName}>{pokemon.name}</Text>
+          <Text style={[styles.pokemonName, { color: textColor }]}>{pokemon.name}</Text>
 
           {/* Types */}
           <View style={styles.typesRow}>
             {pokemon.types.map((type) => (
               <View key={type} style={styles.typeBadge}>
-                <Text style={styles.typeText}>{type}</Text>
+                <Text style={[styles.typeText, { color: textColor }]}>{type}</Text>
               </View>
             ))}
           </View>
@@ -116,18 +117,18 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
           {/* Info Row */}
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
-              <Text style={styles.infoValue}>{pokemon.height}m</Text>
-              <Text style={styles.infoLabel}>Altura</Text>
+              <Text style={[styles.infoValue, { color: textColor }]}>{pokemon.height}m</Text>
+              <Text style={[styles.infoLabel, { color: textColor }]}>Altura</Text>
             </View>
-            <View style={styles.infoDivider} />
+            <View style={[styles.infoDivider, { backgroundColor: textColor }]} />
             <View style={styles.infoItem}>
-              <Text style={styles.infoValue}>{pokemon.weight}kg</Text>
-              <Text style={styles.infoLabel}>Peso</Text>
+              <Text style={[styles.infoValue, { color: textColor }]}>{pokemon.weight}kg</Text>
+              <Text style={[styles.infoLabel, { color: textColor }]}>Peso</Text>
             </View>
-            <View style={styles.infoDivider} />
+            <View style={[styles.infoDivider, { backgroundColor: textColor }]} />
             <View style={styles.infoItem}>
-              <Text style={styles.infoValue}>{totalStats}</Text>
-              <Text style={styles.infoLabel}>Total</Text>
+              <Text style={[styles.infoValue, { color: textColor }]}>{totalStats}</Text>
+              <Text style={[styles.infoLabel, { color: textColor }]}>Total</Text>
             </View>
           </View>
 
@@ -136,18 +137,18 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             style={styles.statsContainer}
             showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.sectionTitle}>Estadisticas</Text>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Estadisticas</Text>
             {pokemon.stats.map((stat) => (
               <View key={stat.name} style={styles.statRow}>
-                <Text style={styles.statName}>{stat.name}</Text>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <View style={styles.statBarBg}>
+                <Text style={[styles.statName, { color: textColor }]}>{stat.name}</Text>
+                <Text style={[styles.statValue, { color: textColor }]}>{stat.value}</Text>
+                <View style={[styles.statBarBg, { backgroundColor: textColor }]}>
                   <View
                     style={[
                       styles.statBarFill,
                       {
                         width: `${Math.min((stat.value / 255) * 100, 100)}%`,
-                        backgroundColor: '#FFF',
+                        backgroundColor: bgColor,
                       },
                     ]}
                   />
@@ -156,11 +157,11 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             ))}
 
             {/* Moves */}
-            <Text style={[styles.sectionTitle, { marginTop: 12 }]}>Movimientos</Text>
+            <Text style={[styles.sectionTitle, { color: textColor, marginTop: 12 }]}>Movimientos</Text>
             <View style={styles.movesContainer}>
               {pokemon.moves.map((move) => (
                 <View key={move.name} style={styles.moveBadge}>
-                  <Text style={styles.moveText}>{move.name}</Text>
+                  <Text style={[styles.moveText, { color: textColor }]}>{move.name}</Text>
                 </View>
               ))}
             </View>
@@ -211,7 +212,7 @@ const styles = StyleSheet.create({
     left: 16,
     fontSize: 16,
     fontWeight: '700',
-    color: 'rgba(255, 255, 255, 0.7)',
+    opacity: 0.7,
   },
   pokemonImage: {
     width: 140,
@@ -221,7 +222,6 @@ const styles = StyleSheet.create({
   pokemonName: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#FFF',
     marginBottom: 8,
   },
   typesRow: {
@@ -238,7 +238,6 @@ const styles = StyleSheet.create({
   typeText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFF',
   },
   infoRow: {
     flexDirection: 'row',
@@ -257,16 +256,15 @@ const styles = StyleSheet.create({
   infoDivider: {
     width: 1,
     height: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    opacity: 0.3,
   },
   infoValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFF',
   },
   infoLabel: {
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.8)',
+    opacity: 0.8,
     marginTop: 2,
   },
   statsContainer: {
@@ -276,7 +274,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFF',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -289,22 +286,20 @@ const styles = StyleSheet.create({
     width: 80,
     fontSize: 11,
     fontWeight: '600',
-    color: '#FFF',
   },
   statValue: {
     width: 30,
     fontSize: 11,
     fontWeight: '700',
-    color: '#FFF',
     textAlign: 'right',
     marginRight: 8,
   },
   statBarBg: {
     flex: 1,
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 3,
     overflow: 'hidden',
+    opacity: 0.3,
   },
   statBarFill: {
     height: '100%',
@@ -325,6 +320,5 @@ const styles = StyleSheet.create({
   moveText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#FFF',
   },
 });

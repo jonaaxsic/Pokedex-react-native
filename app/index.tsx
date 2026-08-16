@@ -7,11 +7,11 @@ import { colors } from '../src/theme/colors';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Background white - no image, clean */}
+      {/* Background white */}
       <View style={styles.background} />
 
       {/* Content */}
@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
         {/* Pokemon title */}
         <Image
           source={require('../assets/images/pokedex-ui/new-title.png')}
-          style={[styles.title, { width: width * 0.65 }]}
+          style={[styles.title, { width: width * 0.78 }]}
           resizeMode="contain"
         />
 
@@ -44,18 +44,17 @@ export default function WelcomeScreen() {
           Descubre, captura y conoce a todos los Pokemon.
         </Text>
 
-        {/* Spacer */}
-        <View style={styles.spacer} />
-
-        {/* Pokeball on grass */}
-        <Image
-          source={require('../assets/images/pokedex-ui/pokeball-grass.png')}
-          style={[styles.pokeballGrass, { width: width * 0.65, height: width * 0.55 }]}
-          resizeMode="contain"
-        />
+        {/* Pokeball on grass - subida mas arriba */}
+        <View style={styles.pokeballArea}>
+          <Image
+            source={require('../assets/images/pokedex-ui/pokeball-grass.png')}
+            style={[styles.pokeballGrass, { width: width * 0.65, height: width * 0.55 }]}
+            resizeMode="contain"
+          />
+        </View>
       </View>
 
-      {/* Red separator at bottom */}
+      {/* Red separator at bottom - aspectRatio real del asset */}
       <Image
         source={require('../assets/images/pokedex-ui/separator-red.png')}
         style={styles.separator}
@@ -63,7 +62,7 @@ export default function WelcomeScreen() {
       />
 
       {/* COMENZAR button over the separator curve */}
-      <View style={styles.buttonArea}>
+      <View style={[styles.buttonArea, { bottom: height * 0.1 }]}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.replace('/(tabs)')}
@@ -95,10 +94,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 32,
   },
   title: {
-    height: 90,
+    height: 100,
     marginBottom: 8,
   },
   banner: {
@@ -133,23 +132,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  spacer: {
+  pokeballArea: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   pokeballGrass: {
-    marginBottom: 0,
+    marginBottom: 40,
   },
   separator: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 180,
     width: '100%',
+    aspectRatio: 356 / 700,
   },
   buttonArea: {
     position: 'absolute',
-    bottom: 40,
     left: 0,
     right: 0,
     alignItems: 'center',

@@ -1,91 +1,119 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Pokemon } from '../../../core/models/Pokemon';
-import { pokemonRepository } from '../../../core/repositories/pokemonRepository';
+import { pokemonRepository, PokemonRef } from '../../../core/repositories/pokemonRepository';
 
-const INITIAL_LOAD = 12;
-const LOAD_MORE_COUNT = 10;
+const BATCH_SIZE = 20;
 
 export function usePokedex() {
-  const [allPokemon, setAllPokemon] = useState<Pokemon[]>([]);
-  const [displayedCount, setDisplayedCount] = useState(INITIAL_LOAD);
+  const [refs, setRefs] = useState<PokemonRef[]>([]);
+  const [details, setDetails] = useState<Map<number, Pokemon>>(new Map());
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const loadedRef = useRef(false);
 
-  // Load initial batch
+  // 1) Trae el índice completo (1 solo request, rápido)
   useEffect(() => {
-    if (loadedRef.current) return;
-    loadedRef.current = true;
-
-    setLoading(true);
-    setError(null);
+    let cancelled = false;
 
     pokemonRepository
-      .getFirstN(151) // Load all Gen 1 Pokemon
-      .then((result) => {
-        // Sort by rawId to ensure sequential order (001, 002, 003...)
-        const sorted = result.sort((a, b) => a.rawId - b.rawId);
-        setAllPokemon(sorted);
+      .getAllRefs()
+      .then(async (allRefs) => {
+        if (cancelled) return;
+        setRefs(allRefs);
+        // 2) Carga el primer lote de detalle
+        const firstBatch = allRefs.slice(0, BATCH_SIZE).map((r) => r.id);
+        const pokes = await pokemonRepository.getBatch(firstBatch);
+        if (cancelled) return;
+        setDetails(new Map(pokes.map((p) => [p.rawId, p])));
+        setLoadedCount(BATCH_SIZE);
       })
       .catch((e) => {
-        setError(e.message ?? 'Error al cargar Pokemon');
+        if (!cancelled) setError(e.message ?? 'Error al cargar Pokemon');
       })
       .finally(() => {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       });
+
+    return () => { cancelled = true; };
   }, []);
 
-  // Load more handler
-  const loadMore = useCallback(() => {
-    if (loadingMore) return;
+  // 3) loadMore pide el SIGUIENTE lote real a la API
+  const loadMore = useCallback(async () => {
+    if (loadingMore || loadedCount >= refs.length) return;
     setLoadingMore(true);
-    setTimeout(() => {
-      setDisplayedCount((prev) => prev + LOAD_MORE_COUNT);
-      setLoadingMore(false);
-    }, 300);
-  }, [loadingMore]);
+    const nextIds = refs.slice(loadedCount, loadedCount + BATCH_SIZE).map((r) => r.id);
+    const pokes = await pokemonRepository.getBatch(nextIds);
+    setDetails((prev) => {
+      const next = new Map(prev);
+      pokes.forEach((p) => next.set(p.rawId, p));
+      return next;
+    });
+    setLoadedCount((prev) => prev + BATCH_SIZE);
+    setLoadingMore(false);
+  }, [refs, loadedCount, loadingMore]);
 
-  // Search filter - supports name, id, and partial matching
+  // 4) Buscar: si el pokemon ya está en refs pero no tiene detalle, lo pide bajo demanda
   const searchPokemon = useCallback(
+    async (query: string): Promise<Pokemon[]> => {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        return Array.from(details.values()).sort((a, b) => a.rawId - b.rawId);
+      }
+
+      const cleanQuery = q.replace(/^0+/, '');
+      const matches = refs.filter(
+        (r) => r.name.toLowerCase().includes(q) || r.id.toString() === cleanQuery
+      );
+
+      // pide el detalle de los que falten
+      const missing = matches.filter((m) => !details.has(m.id));
+      if (missing.length > 0) {
+        const fetched = await pokemonRepository.getBatch(missing.map((m) => m.id));
+        setDetails((prev) => {
+          const next = new Map(prev);
+          fetched.forEach((p) => next.set(p.rawId, p));
+          return next;
+        });
+      }
+
+      return matches
+        .map((m) => details.get(m.id) ?? null)
+        .filter((p): p is Pokemon => p !== null);
+    },
+    [refs, details]
+  );
+
+  // 5) Get displayed Pokemon (sync wrapper for FlatList)
+  const getDisplayedPokemon = useCallback(
     (query: string): Pokemon[] => {
       const q = query.trim().toLowerCase();
       if (!q) {
-        return allPokemon.slice(0, displayedCount);
+        return Array.from(details.values()).sort((a, b) => a.rawId - b.rawId);
       }
 
-      // Search all loaded Pokemon by name or id
-      const results = allPokemon.filter((p) => {
-        const nameMatch = p.name.toLowerCase().includes(q);
-        // Support zero-padded IDs like "015" -> "15" -> match id "15"
-        const cleanQuery = q.replace(/^0+/, '');
-        const idMatch = p.id.toString() === cleanQuery || p.id.toString() === q;
-        return nameMatch || idMatch;
-      });
-
-      return results;
+      const cleanQuery = q.replace(/^0+/, '');
+      return refs
+        .filter(
+          (r) => r.name.toLowerCase().includes(q) || r.id.toString() === cleanQuery
+        )
+        .map((m) => details.get(m.id))
+        .filter((p): p is Pokemon => p !== null);
     },
-    [allPokemon, displayedCount]
+    [refs, details]
   );
 
-  // Get displayed Pokemon
-  const getDisplayedPokemon = useCallback(
-    (query: string): Pokemon[] => {
-      return searchPokemon(query);
-    },
-    [searchPokemon]
-  );
-
-  const hasMore = displayedCount < allPokemon.length;
+  const hasMore = loadedCount < refs.length;
 
   return {
-    allPokemon,
+    allPokemon: Array.from(details.values()),
     loading,
     loadingMore,
     error,
     hasMore,
-    displayedCount,
+    loadedCount,
     loadMore,
+    searchPokemon,
     getDisplayedPokemon,
   };
 }

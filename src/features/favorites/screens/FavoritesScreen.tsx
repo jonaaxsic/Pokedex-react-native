@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PokemonCard from '../../pokedex/components/PokemonCard';
+import PokemonDetailModal from '../../pokedex/components/PokemonDetailModal';
 import { Pokemon } from '../../../core/models/Pokemon';
 import { pokemonRepository } from '../../../core/repositories/pokemonRepository';
 import { useFavorites } from '../hooks/useFavorites';
@@ -11,6 +12,7 @@ export default function FavoritesScreen() {
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const [favoritePokemon, setFavoritePokemon] = useState<Pokemon[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
 
   useEffect(() => {
     if (favorites.length === 0) {
@@ -38,7 +40,7 @@ export default function FavoritesScreen() {
       ) : favoritePokemon.length === 0 ? (
         <View style={styles.center}>
           <Text style={styles.emptyText}>
-            Aún no tienes Pokémon favoritos.{'\n'}Toca el corazón en Inicio
+            Aun no tienes Pokemon favoritos.{'\n'}Toca el corazon en Inicio
             para agregar uno.
           </Text>
         </View>
@@ -55,10 +57,17 @@ export default function FavoritesScreen() {
               pokemon={item}
               isFavorite={isFavorite(item.id)}
               onToggleFavorite={toggleFavorite}
+              onPress={() => setSelectedPokemon(item)}
             />
           )}
         />
       )}
+
+      <PokemonDetailModal
+        pokemon={selectedPokemon}
+        visible={selectedPokemon !== null}
+        onClose={() => setSelectedPokemon(null)}
+      />
     </SafeAreaView>
   );
 }

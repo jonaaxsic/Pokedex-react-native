@@ -18,6 +18,7 @@ const AVATAR_SIZE = 48;
 const AVATAR_GAP = 12;
 
 const avatarOptions = [
+  { id: 'none', image: null, label: 'Sin avatar' },
   { id: 'trainer-red', image: require('../../../../assets/images/avatars/trainer-red.png'), label: 'Ash' },
   { id: 'trainer-brown', image: require('../../../../assets/images/avatars/trainer-brown.png'), label: 'May' },
   { id: 'pikachu', image: require('../../../../assets/images/avatars/pikachu.png'), label: 'Pikachu' },
@@ -35,7 +36,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { favorites } = useFavorites();
-  const [selectedAvatar, setSelectedAvatar] = useState('pikachu');
+  const [selectedAvatar, setSelectedAvatar] = useState('none');
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -54,6 +55,9 @@ export default function ProfileScreen() {
     flatListRef.current?.scrollToIndex({ index: newIndex, animated: true });
   };
 
+  const currentAvatar = avatarOptions.find(a => a.id === selectedAvatar);
+  const hasImage = currentAvatar?.image != null;
+
   const renderAvatar = ({ item }: { item: typeof avatarOptions[0] }) => {
     const isSelected = selectedAvatar === item.id;
     return (
@@ -62,7 +66,13 @@ export default function ProfileScreen() {
         onPress={() => setSelectedAvatar(item.id)}
         activeOpacity={0.7}
       >
-        <Image source={item.image} style={styles.avatarImage} resizeMode="cover" />
+        {item.image ? (
+          <Image source={item.image} style={styles.avatarImage} resizeMode="cover" />
+        ) : (
+          <View style={styles.emptyAvatar}>
+            <Ionicons name="person" size={24} color="#9CA3AF" />
+          </View>
+        )}
         {isSelected && (
           <View style={styles.avatarCheck}>
             <Ionicons name="checkmark" size={12} color={colors.white} />
@@ -88,7 +98,7 @@ export default function ProfileScreen() {
       />
       <Image
         source={require('../../../../assets/images/pokedex-ui/pasto.png')}
-        style={[styles.bgGrass, { bottom: 60 + insets.bottom }]}
+        style={[styles.bgGrass, { bottom: 0 }]}
         resizeMode="cover"
       />
 
@@ -112,11 +122,17 @@ export default function ProfileScreen() {
           activeOpacity={0.7}
         >
           <View style={styles.avatarCircle}>
-            <Image
-              source={avatarOptions.find(a => a.id === selectedAvatar)?.image || require('../../../../assets/images/avatars/pikachu.png')}
-              style={styles.mainAvatarImage}
-              resizeMode="cover"
-            />
+            {hasImage ? (
+              <Image
+                source={currentAvatar.image}
+                style={styles.mainAvatarImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.mainEmptyAvatar}>
+                <Ionicons name="person" size={32} color="#9CA3AF" />
+              </View>
+            )}
           </View>
           <View style={styles.editIcon}>
             <Ionicons name="pencil" size={12} color={colors.red} />
@@ -292,8 +308,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    height: 120,
-    opacity: 0.3,
+    height: 180,
+    opacity: 1,
   },
   header: {
     flexDirection: 'row',
@@ -331,6 +347,12 @@ const styles = StyleSheet.create({
   mainAvatarImage: {
     width: '100%',
     height: '100%',
+  },
+  mainEmptyAvatar: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   editIcon: {
     position: 'absolute',
@@ -441,6 +463,13 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
+  },
+  emptyAvatar: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarCheck: {
     position: 'absolute',

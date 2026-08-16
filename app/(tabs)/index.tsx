@@ -38,10 +38,10 @@ export default function HomeTabScreen() {
         resizeMode="contain"
       />
 
-      {/* Leaves decoration */}
+      {/* Leaves decoration - pasto completo */}
       <Image
         source={require('../../assets/images/pokedex-ui/pasto.png')}
-        style={[styles.bgGrass, { bottom: 60 + insets.bottom }]}
+        style={[styles.bgGrass, { bottom: 0 }]}
         resizeMode="cover"
       />
 
@@ -58,17 +58,17 @@ export default function HomeTabScreen() {
       </View>
 
       <View style={styles.content}>
-        {/* Logo pokeball */}
-        <Image
-          source={require('../../assets/images/pokedex-ui/logoindex.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        {/* Title */}
+        {/* Title - AGRANDADO, primero */}
         <Image
           source={require('../../assets/images/pokedex-ui/new-title.png')}
           style={styles.title}
+          resizeMode="contain"
+        />
+
+        {/* Logo pokeball - mas pequeno, despues */}
+        <Image
+          source={require('../../assets/images/pokedex-ui/logoindex.png')}
+          style={styles.logo}
           resizeMode="contain"
         />
 
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    height: 120,
-    opacity: 0.3,
+    height: 180,
+    opacity: 1,
   },
   exitButtonContainer: {
     position: 'absolute',
@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
     paddingTop: 80,
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     marginBottom: 4,
   },
   title: {
-    width: 200,
-    height: 60,
+    width: 260,
+    height: 80,
     marginBottom: 16,
   },
   welcomeContainer: {

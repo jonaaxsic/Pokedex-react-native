@@ -9,4 +9,6 @@ export const colors = {
   text: '#111827',
   textMuted: '#6B7280',
   border: '#F3F4F6',
+  green: '#22C55E',
+  greenDark: '#16A34A',
 };

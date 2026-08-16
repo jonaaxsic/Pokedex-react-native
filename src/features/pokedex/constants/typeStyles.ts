@@ -24,6 +24,28 @@ export const TYPE_COLORS: Record<PokemonType, string> = {
   Hielo: "#88DCEB",
 };
 
+// colores de texto por tipo (para contraste sobre fondo del tipo)
+export const TYPE_TEXT_COLORS: Record<PokemonType, string> = {
+  Planta: "#FFFFFF",
+  Fuego: "#FFFFFF",
+  Agua: "#FFFFFF",
+  Electrico: "#3A3A00",
+  Normal: "#4B4B3F",
+  Lucha: "#FFFFFF",
+  Siniestro: "#FFFFFF",
+  Acero: "#2A2A2A",
+  Dragon: "#3A3300",
+  Hada: "#5A0050",
+  Bicho: "#2E3B00",
+  Volador: "#2B215C",
+  Fantasma: "#FFFFFF",
+  Psiquico: "#FFFFFF",
+  Roca: "#FFFFFF",
+  Tierra: "#4A3400",
+  Veneno: "#FFFFFF",
+  Hielo: "#00424A",
+};
+
 // iconos por tipo de pokemon
 export const TYPE_ICONS: Record<PokemonType, string> = {
   Planta: "🌿",

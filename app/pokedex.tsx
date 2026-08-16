@@ -7,7 +7,7 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import SearchBar from '../src/shared/components/SearchBar';
@@ -20,6 +20,7 @@ import { Pokemon } from '../src/core/models/Pokemon';
 
 export default function PokedexScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const {
@@ -96,7 +97,7 @@ export default function PokedexScreen() {
           numColumns={2}
           bounces={false}
           columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{ paddingBottom: 24 + insets.bottom }}
           ListFooterComponent={renderFooter}
           renderItem={({ item }: { item: Pokemon }) => (
             <PokemonCard
@@ -199,9 +200,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.red,
+    backgroundColor: colors.green,
     marginHorizontal: 16,
     marginTop: 8,
+    marginBottom: 12,
     paddingVertical: 14,
     borderRadius: 16,
     gap: 8,
