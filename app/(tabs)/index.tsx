@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWindowDimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Svg, Path } from 'react-native-svg';
 import { colors } from '../../src/theme/colors';
 import FeatureCard from '../../src/features/pokedex/components/FeatureCard';
 import ExitAppModal from '../../src/shared/components/ExitAppModal';
@@ -41,27 +41,54 @@ export default function HomeTabScreen() {
       {/* Leaves decoration - pasto completo */}
       <Image
         source={require('../../assets/images/pokedex-ui/pasto.png')}
-        style={[styles.bgGrass, { bottom: 0 }]}
+        style={[styles.bgGrass, { bottom: -25 }]}
         resizeMode="cover"
       />
 
-      {/* Exit button */}
-      <View style={[styles.exitButtonContainer, { top: insets.top + 8 }]}>
-        <View style={styles.exitButton}>
-          <Ionicons
-            name="log-out-outline"
-            size={20}
-            color={colors.red}
-            onPress={() => setExitModalVisible(true)}
-          />
-        </View>
+      {/* Exit button — same height as pokedex back button */}
+      <View style={[styles.exitButtonContainer, { top: insets.top + 20 }]}>
+        <Pressable
+          style={({ hovered, pressed }) => [
+            styles.exitButton,
+            hovered && styles.exitButtonHover,
+            pressed && styles.exitButtonPressed,
+          ]}
+          onPress={() => setExitModalVisible(true)}
+        >
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+            {/* Door frame */}
+            <Path
+              d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+              stroke={colors.white}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Arrow */}
+            <Path
+              d="M16 17l5-5-5-5"
+              stroke={colors.white}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Line into door */}
+            <Path
+              d="M21 12H9"
+              stroke={colors.white}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
       </View>
 
       <View style={styles.content}>
-        {/* Title - AGRANDADO, primero */}
+        {/* Title - mismas dimensiones/ubicacion que el index */}
         <Image
           source={require('../../assets/images/pokedex-ui/new-title.png')}
-          style={styles.title}
+          style={[styles.title, { width: width * 0.99 }]}
           resizeMode="contain"
         />
 
@@ -144,27 +171,38 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   exitButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.redSoft,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.red,
     alignItems: 'center',
     justifyContent: 'center',
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255,255,255,0.35)',
+    borderBottomWidth: 3,
+    borderBottomColor: 'rgba(120,20,20,0.55)',
+  },
+  exitButtonHover: {
+    backgroundColor: '#DC2626',
+  },
+  exitButtonPressed: {
+    backgroundColor: '#B91C1C',
+    borderTopWidth: 1,
+    borderBottomWidth: 1.5,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 80,
+    paddingTop: 20,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
+    marginTop: -36,
     marginBottom: 4,
   },
   title: {
-    width: 300,
-    height: 100,
     marginBottom: 16,
   },
   welcomeContainer: {

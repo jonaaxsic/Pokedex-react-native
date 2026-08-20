@@ -4,11 +4,11 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Image,
   FlatList,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useFavorites } from '../../favorites/hooks/useFavorites';
@@ -34,7 +34,6 @@ const avatarOptions = [
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { favorites } = useFavorites();
   const [selectedAvatar, setSelectedAvatar] = useState('none');
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
@@ -61,10 +60,14 @@ export default function ProfileScreen() {
   const renderAvatar = ({ item }: { item: typeof avatarOptions[0] }) => {
     const isSelected = selectedAvatar === item.id;
     return (
-      <TouchableOpacity
-        style={[styles.avatarItem, isSelected && styles.avatarItemSelected]}
+      <Pressable
+        style={({ hovered, pressed }) => [
+          styles.avatarItem,
+          isSelected && styles.avatarItemSelected,
+          hovered && styles.avatarItemHover,
+          pressed && styles.avatarItemPressed,
+        ]}
         onPress={() => setSelectedAvatar(item.id)}
-        activeOpacity={0.7}
       >
         {item.image ? (
           <Image source={item.image} style={styles.avatarImage} resizeMode="cover" />
@@ -78,7 +81,7 @@ export default function ProfileScreen() {
             <Ionicons name="checkmark" size={12} color={colors.white} />
           </View>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 
@@ -102,65 +105,119 @@ export default function ProfileScreen() {
         resizeMode="cover"
       />
 
-      {/* Header with back button */}
+      {/* Header with back button — same height as pokedex */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
+        <Pressable
+          style={({ hovered, pressed }) => [
+            styles.backButton,
+            hovered && styles.backButtonHover,
+            pressed && styles.backButtonPressed,
+          ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="chevron-back" size={28} color="#374151" />
-        </TouchableOpacity>
+          <Ionicons name="chevron-back" size={22} color="#6B7280" />
+        </Pressable>
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Content - NO ScrollView, uses flex to fit */}
-      <View style={styles.content}>
-        {/* Avatar principal */}
-        <TouchableOpacity
-          style={styles.avatarWrapper}
-          onPress={() => setShowAvatarSelector(!showAvatarSelector)}
-          activeOpacity={0.7}
-        >
-          <View style={styles.avatarCircle}>
-            {hasImage ? (
-              <Image
-                source={currentAvatar.image}
-                style={styles.mainAvatarImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <View style={styles.mainEmptyAvatar}>
-                <Ionicons name="person" size={32} color="#9CA3AF" />
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Avatar principal */}
+          <Pressable
+            style={styles.avatarWrapper}
+            onPress={() => setShowAvatarSelector(!showAvatarSelector)}
+          >
+            <View style={styles.avatarCircle}>
+              {hasImage ? (
+                <Image
+                  source={currentAvatar.image}
+                  style={styles.mainAvatarImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.mainEmptyAvatar}>
+                  <Ionicons name="person" size={32} color="#9CA3AF" />
+                </View>
+              )}
+            </View>
+            <View style={styles.editIcon}>
+              <Ionicons name="pencil" size={12} color={colors.red} />
+            </View>
+          </Pressable>
+
+          {/* Name */}
+          <Text style={styles.name}>Entrenador Pokemon</Text>
+
+          {/* Badge "Entrenador" */}
+          <View style={styles.badge}>
+            <Image
+              source={require('../../../../assets/images/icon.png')}
+              style={styles.badgeIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.badgeText}>Entrenador</Text>
+          </View>
+
+          {/* "Tu aventura continua" */}
+          <View style={styles.adventureRow}>
+            <Ionicons name="leaf" size={14} color="#22C55E" />
+            <Text style={styles.adventureText}>Tu aventura continua</Text>
+            <Ionicons name="leaf" size={14} color="#22C55E" />
+          </View>
+
+          {/* Avatar selector section */}
+          {showAvatarSelector && (
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <Image
+                  source={require('../../../../assets/images/icon.png')}
+                  style={styles.sectionHeaderIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.sectionTitle}>ELIGE TU AVATAR</Text>
+                <Image
+                  source={require('../../../../assets/images/icon.png')}
+                  style={styles.sectionHeaderIcon}
+                  resizeMode="contain"
+                />
               </View>
-            )}
-          </View>
-          <View style={styles.editIcon}>
-            <Ionicons name="pencil" size={12} color={colors.red} />
-          </View>
-        </TouchableOpacity>
 
-        {/* Name */}
-        <Text style={styles.name}>Entrenador Pokemon</Text>
+              <View style={styles.avatarCarouselContainer}>
+                <Pressable onPress={() => scrollToAvatar('left')} style={styles.arrowButton}>
+                  <Ionicons name="chevron-back" size={20} color={colors.red} />
+                </Pressable>
 
-        {/* Badge "Entrenador" */}
-        <View style={styles.badge}>
-          <Image
-            source={require('../../../../assets/images/icon.png')}
-            style={styles.badgeIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.badgeText}>Entrenador</Text>
-        </View>
+                <FlatList
+                  ref={flatListRef}
+                  data={avatarOptions}
+                  renderItem={renderAvatar}
+                  keyExtractor={(item) => item.id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.avatarList}
+                  onMomentumScrollEnd={handleScroll}
+                  snapToInterval={AVATAR_SIZE + AVATAR_GAP}
+                  decelerationRate="fast"
+                />
 
-        {/* "Tu aventura continua" */}
-        <View style={styles.adventureRow}>
-          <Ionicons name="leaf" size={14} color="#22C55E" />
-          <Text style={styles.adventureText}>Tu aventura continua</Text>
-          <Ionicons name="leaf" size={14} color="#22C55E" />
-        </View>
+                <Pressable onPress={() => scrollToAvatar('right')} style={styles.arrowButton}>
+                  <Ionicons name="chevron-forward" size={20} color={colors.red} />
+                </Pressable>
+              </View>
 
-        {/* Avatar selector section */}
-        {showAvatarSelector && (
+              {/* Dots indicator */}
+              <View style={styles.dotsContainer}>
+                {avatarOptions.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[styles.dot, currentPage === index && styles.dotActive]}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Stats section */}
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
               <Image
@@ -168,7 +225,7 @@ export default function ProfileScreen() {
                 style={styles.sectionHeaderIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.sectionTitle}>ELIGE TU AVATAR</Text>
+              <Text style={styles.sectionTitle}>ESTADISTICAS</Text>
               <Image
                 source={require('../../../../assets/images/icon.png')}
                 style={styles.sectionHeaderIcon}
@@ -176,119 +233,68 @@ export default function ProfileScreen() {
               />
             </View>
 
-            <View style={styles.avatarCarouselContainer}>
-              <TouchableOpacity onPress={() => scrollToAvatar('left')} style={styles.arrowButton}>
-                <Ionicons name="chevron-back" size={20} color={colors.red} />
-              </TouchableOpacity>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Ionicons name="heart" size={20} color={colors.red} />
+                <Text style={styles.statNumber}>{favorites.length}</Text>
+                <Text style={styles.statLabel}>Favoritos</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Ionicons name="locate" size={20} color={colors.blue} />
+                <Text style={styles.statNumber}>1</Text>
+                <Text style={styles.statLabel}>Regiones vistas</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Ionicons name="flash" size={20} color="#F97316" />
+                <Text style={styles.statNumber}>0</Text>
+                <Text style={styles.statLabel}>Batallas</Text>
+              </View>
+            </View>
+          </View>
 
-              <FlatList
-                ref={flatListRef}
-                data={avatarOptions}
-                renderItem={renderAvatar}
-                keyExtractor={(item) => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.avatarList}
-                onMomentumScrollEnd={handleScroll}
-                snapToInterval={AVATAR_SIZE + AVATAR_GAP}
-                decelerationRate="fast"
+          {/* Actividad reciente */}
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Image
+                source={require('../../../../assets/images/icon.png')}
+                style={styles.sectionHeaderIcon}
+                resizeMode="contain"
               />
-
-              <TouchableOpacity onPress={() => scrollToAvatar('right')} style={styles.arrowButton}>
-                <Ionicons name="chevron-forward" size={20} color={colors.red} />
-              </TouchableOpacity>
+              <Text style={styles.sectionTitle}>ACTIVIDAD RECIENTE</Text>
             </View>
 
-            {/* Dots indicator */}
-            <View style={styles.dotsContainer}>
-              {avatarOptions.map((_, index) => (
-                <View
-                  key={index}
-                  style={[styles.dot, currentPage === index && styles.dotActive]}
-                />
-              ))}
-            </View>
-          </View>
-        )}
+            <Pressable style={({ hovered, pressed }) => [styles.activityRow, hovered && styles.activityRowHover, pressed && styles.activityRowPressed]}>
+              <Image
+                source={require('../../../../assets/images/pokedex-ui/pokedex-device.png')}
+                style={styles.activityIcon}
+                resizeMode="contain"
+              />
+              <View style={styles.activityText}>
+                <Text style={styles.activityTitle}>Pokedex</Text>
+                <Text style={styles.activitySubtitle}>Region explorada</Text>
+                <Text style={styles.activityValue}>Kanto</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
 
-        {/* Stats section */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Image
-              source={require('../../../../assets/images/icon.png')}
-              style={styles.sectionHeaderIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.sectionTitle}>ESTADISTICAS</Text>
-            <Image
-              source={require('../../../../assets/images/icon.png')}
-              style={styles.sectionHeaderIcon}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="heart" size={20} color={colors.red} />
-              <Text style={styles.statNumber}>{favorites.length}</Text>
-              <Text style={styles.statLabel}>Favoritos</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Ionicons name="locate" size={20} color={colors.blue} />
-              <Text style={styles.statNumber}>1</Text>
-              <Text style={styles.statLabel}>Regiones vistas</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Ionicons name="flash" size={20} color="#F97316" />
-              <Text style={styles.statNumber}>0</Text>
-              <Text style={styles.statLabel}>Batallas</Text>
-            </View>
+            <Pressable style={({ hovered, pressed }) => [styles.activityRow, hovered && styles.activityRowHover, pressed && styles.activityRowPressed]}>
+              <Image
+                source={require('../../../../assets/images/pokedex-ui/battle-stadium.png')}
+                style={styles.activityIcon}
+                resizeMode="contain"
+              />
+              <View style={styles.activityText}>
+                <Text style={styles.activityTitle}>Batallas</Text>
+                <Text style={styles.activitySubtitle}>Ultima batalla</Text>
+                <Text style={styles.activityValue}>Sin registros</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
           </View>
         </View>
-
-        {/* Actividad reciente */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Image
-              source={require('../../../../assets/images/icon.png')}
-              style={styles.sectionHeaderIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.sectionTitle}>ACTIVIDAD RECIENTE</Text>
-          </View>
-
-          <TouchableOpacity style={styles.activityRow}>
-            <Image
-              source={require('../../../../assets/images/pokedex-ui/pokedex-device.png')}
-              style={styles.activityIcon}
-              resizeMode="contain"
-            />
-            <View style={styles.activityText}>
-              <Text style={styles.activityTitle}>Pokedex</Text>
-              <Text style={styles.activitySubtitle}>Region explorada</Text>
-              <Text style={styles.activityValue}>Kanto</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.activityRow}>
-            <Image
-              source={require('../../../../assets/images/pokedex-ui/battle-stadium.png')}
-              style={styles.activityIcon}
-              resizeMode="contain"
-            />
-            <View style={styles.activityText}>
-              <Text style={styles.activityTitle}>Batallas</Text>
-              <Text style={styles.activitySubtitle}>Ultima batalla</Text>
-              <Text style={styles.activityValue}>Sin registros</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
   );
 }
 
@@ -314,14 +320,22 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
   backButton: {
     padding: 8,
+    borderRadius: 8,
+  },
+  backButtonHover: {
+    backgroundColor: '#F3F4F6',
+  },
+  backButtonPressed: {
+    backgroundColor: '#E5E7EB',
   },
   headerSpacer: {
-    width: 40,
+    width: 38,
   },
   content: {
     flex: 1,
@@ -345,8 +359,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   mainAvatarImage: {
-    width: '100%',
-    height: '100%',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   mainEmptyAvatar: {
     width: '100%',
@@ -364,16 +379,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.7)',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255,255,255,0.5)',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(140,150,165,0.35)',
+    borderRightWidth: 1.5,
+    borderRightColor: 'rgba(140,150,165,0.25)',
     elevation: 3,
   },
   name: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: '#1E293B',
     marginBottom: 4,
   },
   badge: {
@@ -385,6 +404,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     gap: 4,
     marginBottom: 4,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.5)',
+    borderBottomWidth: 1.5,
+    borderBottomColor: 'rgba(160,50,50,0.2)',
   },
   badgeIcon: {
     width: 14,
@@ -403,22 +426,24 @@ const styles = StyleSheet.create({
   },
   adventureText: {
     fontSize: 12,
-    color: colors.textMuted,
+    color: '#6B7280',
     fontWeight: '500',
   },
   sectionCard: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
+    backgroundColor: '#EDF0F4',
+    borderRadius: 14,
     padding: 12,
     marginBottom: 10,
     width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderTopWidth: 1.5,
+    borderTopColor: 'rgba(255,255,255,0.7)',
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'rgba(255,255,255,0.5)',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(140,150,165,0.35)',
+    borderRightWidth: 2,
+    borderRightColor: 'rgba(140,150,165,0.25)',
+    elevation: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -434,7 +459,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.text,
+    color: '#374151',
     letterSpacing: 1,
   },
   avatarCarouselContainer: {
@@ -442,7 +467,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   arrowButton: {
-    padding: 2,
+    padding: 4,
+    borderRadius: 8,
   },
   avatarList: {
     paddingHorizontal: 4,
@@ -455,14 +481,22 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
+    backgroundColor: '#F3F4F6',
   },
   avatarItemSelected: {
     borderColor: colors.red,
     backgroundColor: colors.redSoft,
   },
+  avatarItemHover: {
+    opacity: 0.85,
+  },
+  avatarItemPressed: {
+    opacity: 0.7,
+  },
   avatarImage: {
-    width: '100%',
-    height: '100%',
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
   },
   emptyAvatar: {
     width: '100%',
@@ -512,17 +546,17 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 32,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(140,150,165,0.3)',
   },
   statNumber: {
     fontSize: 22,
     fontWeight: '700',
-    color: colors.text,
+    color: '#1E293B',
     marginTop: 2,
   },
   statLabel: {
     fontSize: 10,
-    color: colors.textMuted,
+    color: '#6B7280',
     marginTop: 1,
   },
   activityRow: {
@@ -530,7 +564,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: 'rgba(140,150,165,0.25)',
+  },
+  activityRowHover: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  activityRowPressed: {
+    backgroundColor: 'rgba(0,0,0,0.04)',
   },
   activityIcon: {
     width: 40,
@@ -543,11 +583,11 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.text,
+    color: '#1E293B',
   },
   activitySubtitle: {
     fontSize: 10,
-    color: colors.textMuted,
+    color: '#6B7280',
     marginTop: 1,
   },
   activityValue: {

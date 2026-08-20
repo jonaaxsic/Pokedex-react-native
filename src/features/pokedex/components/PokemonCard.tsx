@@ -2,9 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import {
     Dimensions,
     Image,
+    Pressable,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from "react-native";
 import { Pokemon } from "../../../core/models/Pokemon";
@@ -19,7 +19,16 @@ interface Props {
 }
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 16 * 2 - 12) / 2;
+const CARD_WIDTH = (width - 20 * 2 - 16) / 2;
+
+/** Oscurece un color hex #RRGGBB por un porcentaje (0–1) */
+function darken(hex: string, amount: number): string {
+  const raw = hex.replace("#", "");
+  const r = Math.max(0, parseInt(raw.substring(0, 2), 16) - Math.round(255 * amount));
+  const g = Math.max(0, parseInt(raw.substring(2, 4), 16) - Math.round(255 * amount));
+  const b = Math.max(0, parseInt(raw.substring(4, 6), 16) - Math.round(255 * amount));
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
 
 export default function PokemonCard({
   pokemon,
@@ -30,12 +39,18 @@ export default function PokemonCard({
   const mainType = pokemon.types[0];
   const accentColor = TYPE_COLORS[mainType] ?? "#A8A29E";
   const textColor = TYPE_TEXT_COLORS[mainType] ?? "#FFFFFF";
+  const hoverColor = darken(accentColor, 0.12);
+  const pressedColor = darken(accentColor, 0.22);
 
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: accentColor }]}
+    <Pressable
+      style={({ hovered, pressed }) => [
+        styles.card,
+        { backgroundColor: accentColor },
+        hovered && { backgroundColor: hoverColor, ...styles.cardHovered },
+        pressed && { backgroundColor: pressedColor, ...styles.cardPressed },
+      ]}
       onPress={onPress}
-      activeOpacity={0.85}
     >
       {/* Top area - imagen y detalles */}
       <View style={styles.topArea}>
@@ -45,7 +60,7 @@ export default function PokemonCard({
         </View>
 
         {/* Heart */}
-        <TouchableOpacity
+        <Pressable
           onPress={(e) => {
             e.stopPropagation?.();
             onToggleFavorite(pokemon.id);
@@ -57,7 +72,7 @@ export default function PokemonCard({
             size={18}
             color={isFavorite ? "#EF4444" : textColor}
           />
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Pokemon image */}
         <Image
@@ -72,21 +87,24 @@ export default function PokemonCard({
         <Text style={[styles.name, { color: textColor }]}>{pokemon.name}</Text>
         <TypeBadge types={pokemon.types} textColor={textColor} />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
+    marginBottom: 12,
+    boxShadow: '0px 2px 8px rgba(0,0,0,0.08), 0px 8px 24px rgba(0,0,0,0.12)',
+    elevation: 6,
+  },
+  cardHovered: {
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.12), 0px 12px 32px rgba(0,0,0,0.18)',
+  },
+  cardPressed: {
+    boxShadow: '0px 1px 4px rgba(0,0,0,0.06), 0px 4px 12px rgba(0,0,0,0.1)',
   },
   topArea: {
     paddingTop: 10,

@@ -1,179 +1,141 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useWindowDimensions } from 'react-native';
-import { colors } from '../src/theme/colors';
+import { useRouter } from "expo-router";
+import {
+    Image,
+    Pressable,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      {/* Background white */}
-      <View style={styles.background} />
+    <View style={s.bg}>
+      <Image
+        source={require("../assets/images/pokedex-ui/android-icon-background.jpg")}
+        style={[s.bgImage, { width, height }]}
+        resizeMode="cover"
+      />
+      <SafeAreaView style={s.safe} edges={["top", "bottom"]}>
+        <View style={s.inner}>
+          <View style={s.topSection}>
+            <Image
+              source={require("../assets/images/pokedex-ui/new-title.png")}
+              style={[s.logo, { width: width * 0.99 }]}
+              resizeMode="contain"
+            />
+          </View>
 
-      {/* Top content: title + banner + subtitle */}
-      <View style={styles.topContent}>
-        <Image
-          source={require('../assets/images/pokedex-ui/new-title.png')}
-          style={[styles.title, { width: width * 0.88 }]}
-          resizeMode="contain"
-        />
+          <View style={s.heroSection}>
+            <Image
+              source={require("../assets/images/pokedex-ui/pokedex-device.png")}
+              style={[
+                s.pokedexImage,
+                { width: width * 0.75, height: width * 0.65 },
+              ]}
+              resizeMode="contain"
+            />
+          </View>
 
-        <View style={styles.banner}>
-          <Image
-            source={require('../assets/images/icon.png')}
-            style={styles.bannerIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.bannerText}>POKEDEX</Text>
-          <Image
-            source={require('../assets/images/icon.png')}
-            style={styles.bannerIcon}
-            resizeMode="contain"
-          />
+          <View style={s.bottomSection}>
+            <Text style={s.headline}>Descúbrelos a todos</Text>
+            <Text style={s.sub}>Explora, descubre y complecta tu Pokédex.</Text>
+            <Pressable
+              style={({ hovered, pressed }) => [
+                s.btn,
+                hovered && s.btnHover,
+                pressed && s.btnPressed,
+              ]}
+              onPress={() => router.replace("/(tabs)")}
+            >
+              <Text style={s.btnText}>COMENZAR</Text>
+            </Pressable>
+          </View>
         </View>
-
-        <Text style={styles.subtitle}>Explora el mundo Pokemon</Text>
-        <Text style={styles.description}>
-          Descubre, captura y conoce a todos los Pokemon.
-        </Text>
-      </View>
-
-      {/* Bottom section: pokeball sits on the separator curve */}
-      <View style={styles.bottomSection}>
-        {/* Separator as background - curve at bottom */}
-        <Image
-          source={require('../assets/images/pokedex-ui/separator-red.png')}
-          style={styles.separator}
-          resizeMode="contain"
-        />
-        {/* Pokeball positioned just above the curve */}
-        <Image
-          source={require('../assets/images/pokedex-ui/pokeball-grass.png')}
-          style={[styles.pokeballGrass, { width: width * 0.62 }]}
-          resizeMode="contain"
-        />
-        {/* COMENZAR button on the curve */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.replace('/(tabs)')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.buttonText}>COMENZAR</Text>
-          <Image
-            source={require('../assets/images/icon.png')}
-            style={styles.buttonIcon}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-        <Text style={styles.bottomText}>Tu aventura comienza aqui</Text>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const s = StyleSheet.create({
+  bg: {
     flex: 1,
-    backgroundColor: colors.white,
   },
-  background: {
+  bgImage: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: colors.white,
+    transform: [{ scale: 1.25 }, { translateY: 100 }],
   },
-  topContent: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 12,
+  safe: {
+    flex: 1,
+    elevation: 1,
   },
-  title: {
-    height: 180,
-    marginBottom: 12,
+  inner: {
+    flex: 1,
+    paddingHorizontal: 28,
+    justifyContent: "space-between",
+    paddingBottom: 24,
   },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.red,
-    borderRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginBottom: 16,
-    gap: 8,
+  topSection: {
+    alignItems: "center",
+    paddingTop: 20,
   },
-  bannerIcon: {
-    width: 22,
-    height: 22,
+  logo: {},
+
+  heroSection: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    paddingBottom: 300,
   },
-  bannerText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.white,
-    letterSpacing: 2,
+  pokedexImage: {},
+  bottomSection: {
+    alignItems: "center",
+    marginBottom: 45,
+    marginTop: -24,
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text,
+  headline: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1A1A2E",
     marginBottom: 6,
   },
-  description: {
+  sub: {
     fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
+    color: "#6B7280",
+    textAlign: "center",
     lineHeight: 20,
+    marginBottom: 28,
   },
-  bottomSection: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  separator: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    width: '100%',
-    height: 260,
-  },
-  pokeballGrass: {
-    marginBottom: -30,
-    zIndex: 1,
-  },
-  button: {
-    backgroundColor: colors.white,
-    flexDirection: 'row',
-    alignItems: 'center',
+  btn: {
+    width: "100%",
+    maxWidth: 300,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EF4444",
     paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
-    gap: 10,
-    marginBottom: 12,
-    zIndex: 2,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderTopWidth: 2,
+    borderTopColor: "rgba(255,255,255,0.45)",
+    borderBottomWidth: 3,
+    borderBottomColor: "rgba(120,20,20,0.65)",
   },
-  buttonText: {
+  btnHover: {
+    backgroundColor: "#DC2626",
+    transform: [{ translateY: -2 }],
+  },
+  btnPressed: {
+    backgroundColor: "#B91C1C",
+    transform: [{ translateY: 2 }],
+  },
+  btnText: {
     fontSize: 18,
-    fontWeight: '700',
-    color: colors.red,
-    letterSpacing: 1,
-  },
-  buttonIcon: {
-    width: 24,
-    height: 24,
-  },
-  bottomText: {
-    fontSize: 13,
-    color: colors.white,
-    fontWeight: '500',
-    zIndex: 2,
-    marginBottom: 40,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    letterSpacing: 1.5,
   },
 });

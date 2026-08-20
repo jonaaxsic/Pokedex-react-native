@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import {
   FlatList,
+  Image,
   StyleSheet,
   Text,
   ActivityIndicator,
   View,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -37,10 +38,13 @@ export default function PokedexScreen() {
   const renderFooter = () => {
     if (!hasMore || query.trim()) return null;
     return (
-      <TouchableOpacity
-        style={styles.loadMoreButton}
+      <Pressable
+        style={({ hovered, pressed }) => [
+          styles.loadMoreButton,
+          hovered && styles.loadMoreButtonHover,
+          pressed && styles.loadMoreButtonPressed,
+        ]}
         onPress={loadMore}
-        activeOpacity={0.7}
         disabled={loadingMore}
       >
         {loadingMore ? (
@@ -51,7 +55,7 @@ export default function PokedexScreen() {
             <Text style={styles.loadMoreText}>Mostrar mas</Text>
           </>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 
@@ -59,14 +63,32 @@ export default function PokedexScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
+        <Pressable
+          style={({ hovered, pressed }) => [
+            styles.backButton,
+            hovered && styles.backButtonHover,
+            pressed && styles.backButtonPressed,
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons name="chevron-back" size={22} color="#6B7280" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Pokedex</Text>
+        </Pressable>
+
         <View style={styles.headerSpacer} />
+
+        {/* Banner neuromórfico */}
+        <View style={styles.banner}>
+          <Image
+            source={require('../assets/images/icon.png')}
+            style={styles.bannerIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.bannerText}>POKÉDEX</Text>
+        </View>
+
+        <View style={styles.headerSpacer} />
+
+        <View style={styles.headerRight} />
       </View>
 
       {/* Search bar */}
@@ -82,12 +104,12 @@ export default function PokedexScreen() {
         <View style={styles.center}>
           <Ionicons name="cloud-offline-outline" size={48} color="#D1D5DB" />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity
+          <Pressable
             style={styles.retryButton}
             onPress={() => router.replace('/pokedex')}
           >
             <Text style={styles.retryText}>Reintentar</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ) : (
         <FlatList
@@ -96,7 +118,7 @@ export default function PokedexScreen() {
           numColumns={2}
           bounces={false}
           columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
-          contentContainerStyle={{ paddingBottom: 24 + insets.bottom }}
+          contentContainerStyle={{ paddingTop: 10, paddingBottom: 24 + insets.bottom }}
           ListFooterComponent={renderFooter}
           renderItem={({ item }: { item: Pokemon }) => (
             <PokemonCard
@@ -145,11 +167,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
   backButton: {
     padding: 8,
+    borderRadius: 8,
+  },
+  backButtonHover: {
+    backgroundColor: '#F3F4F6',
+  },
+  backButtonPressed: {
+    backgroundColor: '#E5E7EB',
   },
   headerTitle: {
     flex: 1,
@@ -158,8 +188,36 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
   },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8ECF1',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    marginTop: 8,
+    borderTopWidth: 1.5,
+    borderTopColor: 'rgba(255,255,255,0.7)',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(160,170,185,0.4)',
+  },
+  bannerIcon: {
+    width: 26,
+    height: 26,
+    marginRight: 10,
+  },
+  bannerText: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#374151',
+    letterSpacing: 3,
+  },
   headerSpacer: {
-    width: 40,
+    flex: 1,
+  },
+  headerRight: {
+    width: 38,
   },
   center: {
     flex: 1,
@@ -213,10 +271,26 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 16,
     gap: 8,
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255,255,255,0.4)',
+    borderBottomWidth: 3,
+    borderBottomColor: 'rgba(10,80,20,0.5)',
+  },
+  loadMoreButtonHover: {
+    backgroundColor: '#1DB954',
+    transform: [{ translateY: -2 }],
+  },
+  loadMoreButtonPressed: {
+    backgroundColor: colors.greenDark,
+    transform: [{ translateY: 2 }],
+    borderTopWidth: 3,
+    borderTopColor: 'rgba(10,80,20,0.5)',
+    borderBottomWidth: 2,
+    borderBottomColor: 'rgba(255,255,255,0.4)',
   },
   loadMoreText: {
     color: colors.white,
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
   },
 });
