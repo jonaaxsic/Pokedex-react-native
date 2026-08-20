@@ -13,14 +13,21 @@ import { usePokemonIndex } from './usePokemonIndex';
  * - Race conditions handled via abortRef.
  * - No manual state juggling — query cache is the source of truth.
  */
+const EMPTY_REFS: import('../../../core/repositories/pokemonRepository').PokemonRef[] = [];
+
 export function usePokedex(query: string = '') {
-  const { data: refs = [], isLoading: indexLoading, error: indexError } = usePokemonIndex();
+  const { data, isLoading: indexLoading, error: indexError } = usePokemonIndex();
+  const refs = data ?? EMPTY_REFS;
   const [details, setDetails] = useState<Map<number, Pokemon>>(new Map());
+  const detailsRef = useRef(details);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
   const [searchResults, setSearchResults] = useState<Pokemon[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const abortRef = useRef(0);
+
+  // Mantener detailsRef sincronizado con el state
+  detailsRef.current = details;
 
   // Load first batch on mount
   useEffect(() => {
@@ -54,10 +61,14 @@ export function usePokedex(query: string = '') {
   };
 
   // Search with on-demand fetch
+  // NOTA: detailsRef reemplaza details en las dependencias para evitar el loop infinito.
+  // El efecto solo se re-ejecuta cuando cambia query o refs, no cada vez que
+  // setDetails crea un nuevo Map. detailsRef.current siempre apunta al Map más reciente.
   useEffect(() => {
     const trimmed = query.trim();
 
     if (!trimmed) {
+      ++abortRef.current; // cancela fetches de búsqueda en vuelo
       setSearchResults([]);
       setIsSearching(false);
       return;
@@ -77,11 +88,13 @@ export function usePokedex(query: string = '') {
       return;
     }
 
+    const currentDetails = detailsRef.current;
+
     // Check which are missing
-    const missing = matches.filter((m) => !details.has(m.id));
+    const missing = matches.filter((m) => !currentDetails.has(m.id));
 
     if (missing.length === 0) {
-      const results = matches.map((m) => details.get(m.id)!);
+      const results = matches.map((m) => currentDetails.get(m.id)!);
       if (thisSearch === abortRef.current) {
         setSearchResults(results);
         setIsSearching(false);
@@ -89,21 +102,15 @@ export function usePokedex(query: string = '') {
       return;
     }
 
-    // Fetch missing
+    // Fetch missing — NO agregamos al Map de details para no contaminar la grilla principal
     pokemonRepository
       .getBatch(missing.map((m) => m.id))
       .then((fetched) => {
         if (thisSearch !== abortRef.current) return;
 
-        setDetails((prev) => {
-          const next = new Map(prev);
-          fetched.forEach((p) => next.set(p.rawId, p));
-          return next;
-        });
-
         const fetchedMap = new Map(fetched.map((p) => [p.rawId, p]));
         const results = matches
-          .map((m) => fetchedMap.get(m.id) ?? details.get(m.id) ?? null)
+          .map((m) => fetchedMap.get(m.id) ?? currentDetails.get(m.id) ?? null)
           .filter((p): p is Pokemon => p != null);
 
         setSearchResults(results);
@@ -115,7 +122,7 @@ export function usePokedex(query: string = '') {
           setIsSearching(false);
         }
       });
-  }, [query, refs, details]);
+  }, [query, refs]);
 
   const displayData = useMemo(
     () =>
