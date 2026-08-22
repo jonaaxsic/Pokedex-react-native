@@ -60,10 +60,7 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '100%',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    boxShadow: '0px 4px 24px rgba(0,0,0,0.2)',
     elevation: 8,
   },
   closeButton: {

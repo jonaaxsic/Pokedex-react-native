@@ -1,5 +1,6 @@
 // Jest setup file
 global.__DEV__ = true;
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {

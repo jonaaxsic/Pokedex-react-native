@@ -21,8 +21,11 @@ export function isNumericQuery(normalized: string): boolean {
 
 /**
  * Busca Pokémon por nombre o número en la lista de refs.
- * - Nombre: coincidencia parcial, case-insensitive (ej: "lugia", "pika")
- * - Número: coincidencia exacta o parcial (ej: "249", "24", "9")
+ * - Nombre: coincidencia parcial, case-insensitive (ej: "lugia", "pika"), máximo 30 resultados
+ * - Número: la coincidencia EXACTA tiene prioridad (ej: "25" devuelve solo #25).
+ *   Sin coincidencia exacta y con 2+ dígitos, devuelve coincidencias parciales
+ *   (ej: "24" coincide con "249", "240", "124", etc.), máximo 10 resultados.
+ *   Queries numéricos de 1 dígito sin coincidencia exacta devuelven [].
  *
  * @param refs - Lista de Pokémon disponibles (nombre + id)
  * @param rawQuery - Query del usuario sin normalizar
@@ -38,27 +41,24 @@ export function searchPokemonRefs(
     return [];
   }
 
-  const isNumber = isNumericQuery(q);
+  const sorted = [...refs].sort((a, b) => a.id - b.id);
 
-  return refs.filter((r) => {
-    // Búsqueda por nombre (siempre case-insensitive, coincidencia parcial)
-    if (r.name.toLowerCase().includes(q)) {
-      return true;
+  if (isNumericQuery(q)) {
+    const exact = sorted.find((r) => r.id.toString() === q);
+    if (exact) {
+      return [exact];
     }
 
-    // Búsqueda por número
-    if (isNumber) {
-      const pokemonId = r.id.toString();
-      // Coincidencia exacta: "249" === "249"
-      if (pokemonId === q) {
-        return true;
-      }
-      // Coincidencia parcial: "24" coincide con "249", "240", "124", etc.
-      if (pokemonId.includes(q)) {
-        return true;
-      }
+    if (q.length < 2) {
+      return [];
     }
 
-    return false;
-  });
+    return sorted
+      .filter((r) => r.id.toString().includes(q))
+      .slice(0, 10);
+  }
+
+  return sorted
+    .filter((r) => r.name.toLowerCase().includes(q))
+    .slice(0, 30);
 }

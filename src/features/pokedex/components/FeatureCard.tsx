@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { colors } from '../../../theme/colors';
 
 interface FeatureCardProps {
@@ -20,17 +20,21 @@ export default function FeatureCard({
   const isRed = variant === 'red';
 
   return (
-    <TouchableOpacity
-      style={[styles.card, isRed ? styles.cardRed : styles.cardBlue]}
+    <Pressable
+      style={({ hovered, pressed }) => [
+        styles.card,
+        isRed ? styles.cardRed : styles.cardBlue,
+        hovered && (isRed ? styles.cardRedHover : styles.cardBlueHover),
+        pressed && styles.cardPressed,
+      ]}
       onPress={onPress}
-      activeOpacity={0.85}
     >
       <Image source={image} style={styles.image} resizeMode="contain" />
       <View style={styles.textContainer}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -40,26 +44,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 20,
     marginHorizontal: 20,
-    marginBottom: 16,
-    paddingVertical: 20,
+    marginBottom: 28,
+    paddingVertical: 14,
     paddingRight: 20,
     paddingLeft: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255,255,255,0.45)',
+    borderBottomWidth: 3,
     overflow: 'hidden',
   },
   cardRed: {
     backgroundColor: colors.red,
+    borderBottomColor: 'rgba(120,20,20,0.65)',
   },
   cardBlue: {
     backgroundColor: colors.blue,
+    borderBottomColor: 'rgba(20,40,120,0.65)',
+  },
+  cardRedHover: {
+    backgroundColor: colors.redDark,
+    transform: [{ translateY: -2 }],
+  },
+  cardBlueHover: {
+    backgroundColor: '#1D4ED8',
+    transform: [{ translateY: -2 }],
+  },
+  cardPressed: {
+    transform: [{ translateY: 2 }],
   },
   image: {
-    width: 120,
-    height: 100,
+    width: 100,
+    height: 84,
     marginRight: 8,
   },
   textContainer: {

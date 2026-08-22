@@ -30,6 +30,15 @@ export default function WelcomeScreen() {
             />
           </View>
 
+          <View style={s.pokedexLabel}>
+            <Image
+              source={require("../assets/images/icon.png")}
+              style={s.pokedexLabelIcon}
+              resizeMode="contain"
+            />
+            <Text style={s.pokedexLabelText}>POKÉDEX</Text>
+          </View>
+
           <View style={s.heroSection}>
             <Image
               source={require("../assets/images/pokedex-ui/pokedex-device.png")}
@@ -81,21 +90,45 @@ const s = StyleSheet.create({
   },
   topSection: {
     alignItems: "center",
-    paddingTop: 20,
+    paddingTop: 3,
   },
   logo: {},
+
+  pokedexLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(232,236,241,0.7)",
+    borderRadius: 14,
+    paddingVertical: 9,
+    paddingHorizontal: 24,
+    alignSelf: "center",
+    marginTop: -30,
+    marginBottom: 16,
+  },
+  pokedexLabelIcon: {
+    width: 22,
+    height: 22,
+    marginRight: 10,
+  },
+  pokedexLabelText: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#374151",
+    letterSpacing: 3,
+  },
 
   heroSection: {
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
-    paddingBottom: 300,
+    paddingBottom: 260,
   },
   pokedexImage: {},
   bottomSection: {
     alignItems: "center",
-    marginBottom: 45,
-    marginTop: -24,
+    marginBottom: 30,
+    marginTop: 30,
   },
   headline: {
     fontSize: 22,
@@ -108,7 +141,7 @@ const s = StyleSheet.create({
     color: "#6B7280",
     textAlign: "center",
     lineHeight: 20,
-    marginBottom: 28,
+    marginBottom: 16,
   },
   btn: {
     width: "100%",

@@ -4,6 +4,9 @@
 node_modules/
 .alt/
 .cloude/
+.agents/
+CLAUDE.md
+AGENTS.md
 
 # Expo
 .expo/

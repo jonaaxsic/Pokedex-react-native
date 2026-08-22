@@ -1,21 +1,25 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Pokemon } from '../../../core/models/Pokemon';
-import { pokemonRepository } from '../../../core/repositories/pokemonRepository';
+import { pokemonRepository, PokemonRef } from '../../../core/repositories/pokemonRepository';
 import { searchPokemonRefs } from '../utils/searchPokemon';
 import { usePokemonIndex } from './usePokemonIndex';
+import { pokemonKeys, CACHE_TIMES } from '../../../core/queryKeys';
+
+const BATCH_SIZE = 20;
 
 /**
- * Complete Pokedex hook powered by TanStack Query.
+ * Complete Pokedex hook powered by TanStack Query cache.
  *
  * - Index (all Pokémon refs) is cached globally — 1 request, 30 min fresh.
- * - First 20 details loaded on mount.
+ * - Detail batches go through queryClient.fetchQuery — cached per ID.
  * - Search fetches on-demand from the index, then batch-loads only missing details.
  * - Race conditions handled via abortRef.
- * - No manual state juggling — query cache is the source of truth.
  */
-const EMPTY_REFS: import('../../../core/repositories/pokemonRepository').PokemonRef[] = [];
+const EMPTY_REFS: PokemonRef[] = [];
 
 export function usePokedex(query: string = '') {
+  const queryClient = useQueryClient();
   const { data, isLoading: indexLoading, error: indexError } = usePokemonIndex();
   const refs = data ?? EMPTY_REFS;
   const [details, setDetails] = useState<Map<number, Pokemon>>(new Map());
@@ -25,50 +29,79 @@ export function usePokedex(query: string = '') {
   const [searchResults, setSearchResults] = useState<Pokemon[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const abortRef = useRef(0);
+  const prefetchedAt = useRef(-1);
 
-  // Mantener detailsRef sincronizado con el state
   detailsRef.current = details;
+
+  /**
+   * Fetch a batch of IDs through TanStack Query cache.
+   * Each individual Pokemon is cached by pokemonKeys.detail(id).
+   */
+  const fetchBatchCached = useCallback(
+    async (ids: number[]): Promise<Pokemon[]> => {
+      const results = await Promise.all(
+        ids.map((id) =>
+          queryClient.fetchQuery<Pokemon>({
+            queryKey: pokemonKeys.detail(id),
+            queryFn: () => pokemonRepository.getById(id),
+            ...CACHE_TIMES.detail,
+          })
+        )
+      );
+      return results;
+    },
+    [queryClient]
+  );
+
+  /** Prefetch next batch into query cache (fire-and-forget). */
+  const prefetchNext = useCallback(() => {
+    if (loadingMore || indexLoading) return;
+    const nextStart = loadedCount;
+    if (nextStart >= refs.length) return;
+    if (prefetchedAt.current === nextStart) return;
+    prefetchedAt.current = nextStart;
+    const ids = refs.slice(nextStart, nextStart + BATCH_SIZE).map((r) => r.id);
+    fetchBatchCached(ids).catch(() => { prefetchedAt.current = -1; });
+  }, [loadingMore, indexLoading, loadedCount, refs, fetchBatchCached]);
 
   // Load first batch on mount
   useEffect(() => {
     if (refs.length === 0 || loadedCount > 0) return;
 
-    const firstIds = refs.slice(0, 20).map((r) => r.id);
+    const firstIds = refs.slice(0, BATCH_SIZE).map((r) => r.id);
     setLoadingMore(true);
 
-    pokemonRepository
-      .getBatch(firstIds)
+    fetchBatchCached(firstIds)
       .then((pokes) => {
         setDetails(new Map(pokes.map((p) => [p.rawId, p])));
-        setLoadedCount(20);
+        setLoadedCount(BATCH_SIZE);
       })
       .finally(() => setLoadingMore(false));
-  }, [refs, loadedCount]);
+  }, [refs, loadedCount, fetchBatchCached]);
 
   // Load more batches
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (loadingMore || loadedCount >= refs.length) return;
     setLoadingMore(true);
-    const nextIds = refs.slice(loadedCount, loadedCount + 20).map((r) => r.id);
-    const pokes = await pokemonRepository.getBatch(nextIds);
+    const nextIds = refs
+      .slice(loadedCount, loadedCount + BATCH_SIZE)
+      .map((r) => r.id);
+    const pokes = await fetchBatchCached(nextIds);
     setDetails((prev) => {
       const next = new Map(prev);
       pokes.forEach((p) => next.set(p.rawId, p));
       return next;
     });
-    setLoadedCount((prev) => prev + 20);
+    setLoadedCount((prev) => prev + BATCH_SIZE);
     setLoadingMore(false);
-  };
+  }, [loadingMore, loadedCount, refs, fetchBatchCached]);
 
   // Search with on-demand fetch
-  // NOTA: detailsRef reemplaza details en las dependencias para evitar el loop infinito.
-  // El efecto solo se re-ejecuta cuando cambia query o refs, no cada vez que
-  // setDetails crea un nuevo Map. detailsRef.current siempre apunta al Map más reciente.
   useEffect(() => {
     const trimmed = query.trim();
 
     if (!trimmed) {
-      ++abortRef.current; // cancela fetches de búsqueda en vuelo
+      ++abortRef.current;
       setSearchResults([]);
       setIsSearching(false);
       return;
@@ -89,8 +122,6 @@ export function usePokedex(query: string = '') {
     }
 
     const currentDetails = detailsRef.current;
-
-    // Check which are missing
     const missing = matches.filter((m) => !currentDetails.has(m.id));
 
     if (missing.length === 0) {
@@ -102,9 +133,8 @@ export function usePokedex(query: string = '') {
       return;
     }
 
-    // Fetch missing — NO agregamos al Map de details para no contaminar la grilla principal
-    pokemonRepository
-      .getBatch(missing.map((m) => m.id))
+    // Fetch missing through cache
+    fetchBatchCached(missing.map((m) => m.id))
       .then((fetched) => {
         if (thisSearch !== abortRef.current) return;
 
@@ -122,7 +152,7 @@ export function usePokedex(query: string = '') {
           setIsSearching(false);
         }
       });
-  }, [query, refs]);
+  }, [query, refs, fetchBatchCached]);
 
   const displayData = useMemo(
     () =>
@@ -144,5 +174,6 @@ export function usePokedex(query: string = '') {
     loadMore,
     displayData,
     isSearching,
+    prefetchNext,
   };
 }

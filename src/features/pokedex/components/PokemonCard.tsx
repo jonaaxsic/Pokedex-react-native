@@ -51,6 +51,10 @@ export default function PokemonCard({
         pressed && { backgroundColor: pressedColor, ...styles.cardPressed },
       ]}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Pokemon ${pokemon.name}, tipo ${pokemon.types.join(', ')}`}
+      accessibilityHint="Toca para ver detalles"
+      accessibilityState={{ selected: isFavorite }}
     >
       {/* Top area - imagen y detalles */}
       <View style={styles.topArea}>
@@ -66,6 +70,9 @@ export default function PokemonCard({
             onToggleFavorite(pokemon.id);
           }}
           style={styles.heart}
+          accessibilityRole="togglebutton"
+          accessibilityLabel={isFavorite ? `Quitar ${pokemon.name} de favoritos` : `Agregar ${pokemon.name} a favoritos`}
+          accessibilityState={{ checked: isFavorite }}
         >
           <Ionicons
             name={isFavorite ? "heart" : "heart-outline"}

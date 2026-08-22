@@ -1,9 +1,73 @@
-import React from 'react';
+import React, { createContext, useContext } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../../src/theme/colors';
 import { useComingSoon } from '../../src/shared/context/ComingSoonContext';
+
+const HoverContext = createContext(false);
+
+function useTabHover() {
+  return useContext(HoverContext);
+}
+
+function NeoTabButton({
+  children,
+  onPress,
+  accessibilityState,
+}: {
+  children: React.ReactNode;
+  onPress?: (e: any) => void;
+  accessibilityState?: { selected?: boolean };
+}) {
+  const focused = accessibilityState?.selected;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ hovered, pressed }) => [
+        styles.tabItem,
+        focused && styles.tabItemFocused,
+        hovered && styles.tabItemHover,
+        pressed && styles.tabItemPressed,
+      ]}
+      accessibilityState={accessibilityState}
+    >
+      {({ hovered }) => (
+        <HoverContext.Provider value={hovered}>
+          <View style={styles.tabContent}>{children}</View>
+        </HoverContext.Provider>
+      )}
+    </Pressable>
+  );
+}
+
+function TabIcon({
+  focused,
+  activeIcon,
+  inactiveIcon,
+}: {
+  focused: boolean;
+  activeIcon: keyof typeof Ionicons.glyphMap;
+  inactiveIcon: keyof typeof Ionicons.glyphMap;
+}) {
+  const hovered = useTabHover();
+  const color = hovered ? colors.red : focused ? colors.red : '#9CA3AF';
+  return (
+    <Ionicons
+      name={focused ? activeIcon : inactiveIcon}
+      size={22}
+      color={color}
+    />
+  );
+}
+
+function TabLabel({ focused, label }: { focused: boolean; label: string }) {
+  const hovered = useTabHover();
+  const color = hovered ? colors.red : focused ? colors.red : '#9CA3AF';
+  return <Text style={[styles.tabLabel, { color }]}>{label}</Text>;
+}
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -16,6 +80,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.red,
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarShowLabel: true,
+        tabBarButton: (props) => (
+          <NeoTabButton
+            onPress={props.onPress}
+            accessibilityState={props.accessibilityState}
+          >
+            <View style={styles.tabContent}>{props.children}</View>
+          </NeoTabButton>
+        ),
         tabBarStyle: {
           position: 'absolute',
           left: 0,
@@ -25,18 +97,18 @@ export default function TabLayout() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E7EB',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 8,
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
           elevation: 8,
-          paddingTop: 8,
+          justifyContent: 'center',
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
           marginTop: 2,
         },
+        tabBarLabel: ({ focused, children }) => (
+          <TabLabel focused={focused} label={String(children)} />
+        ),
         tabBarItemStyle: {
           paddingVertical: 4,
         },
@@ -46,8 +118,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Inicio',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} activeIcon="home" inactiveIcon="home-outline" />
           ),
         }}
       />
@@ -55,8 +127,8 @@ export default function TabLayout() {
         name="favorites"
         options={{
           title: 'Favoritos',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={22} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} activeIcon="heart" inactiveIcon="heart-outline" />
           ),
         }}
       />
@@ -64,8 +136,8 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} activeIcon="person" inactiveIcon="person-outline" />
           ),
         }}
       />
@@ -73,8 +145,8 @@ export default function TabLayout() {
         name="proximamente"
         options={{
           title: 'Proximamente',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="hourglass-outline" size={22} color={color} />
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} activeIcon="hourglass" inactiveIcon="hourglass-outline" />
           ),
         }}
         listeners={{
@@ -87,3 +159,31 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  tabItemFocused: {
+    backgroundColor: colors.redSoft,
+  },
+  tabItemHover: {
+    backgroundColor: '#F3F4F6',
+  },
+  tabItemPressed: {
+    backgroundColor: '#E5E7EB',
+  },
+  tabContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -4,
+  },
+  tabLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+});

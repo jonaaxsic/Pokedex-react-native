@@ -16,6 +16,8 @@ import PokemonCard from '../src/features/pokedex/components/PokemonCard';
 import PokemonDetailModal from '../src/features/pokedex/components/PokemonDetailModal';
 import { usePokedex } from '../src/features/pokedex/hooks/usePokedex';
 import { useFavorites } from '../src/features/favorites/hooks/useFavorites';
+import { useDebouncedValue } from '../src/shared/hooks/useDebouncedValue';
+import { useActivity } from '../src/shared/activity/context/ActivityContext';
 import { colors } from '../src/theme/colors';
 import { Pokemon } from '../src/core/models/Pokemon';
 
@@ -23,6 +25,8 @@ export default function PokedexScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(query, 300);
+  const isPending = query.trim() !== debouncedQuery.trim();
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const {
     loading,
@@ -32,8 +36,10 @@ export default function PokedexScreen() {
     loadMore,
     displayData,
     isSearching,
-  } = usePokedex(query);
+    prefetchNext,
+  } = usePokedex(debouncedQuery);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { logActivity } = useActivity();
 
   const renderFooter = () => {
     if (!hasMore || query.trim()) return null;
@@ -120,16 +126,25 @@ export default function PokedexScreen() {
           columnWrapperStyle={{ gap: 12, paddingHorizontal: 16 }}
           contentContainerStyle={{ paddingTop: 10, paddingBottom: 24 + insets.bottom }}
           ListFooterComponent={renderFooter}
+          scrollEventThrottle={200}
+          onScroll={(e) => {
+            const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+            const distanceFromEnd = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+            if (distanceFromEnd < 1500) prefetchNext();
+          }}
           renderItem={({ item }: { item: Pokemon }) => (
             <PokemonCard
               pokemon={item}
               isFavorite={isFavorite(item.id)}
               onToggleFavorite={toggleFavorite}
-              onPress={() => setSelectedPokemon(item)}
+              onPress={() => {
+                setSelectedPokemon(item);
+                logActivity('pokemon_explored', item.name, `Viste a ${item.name}`, item.rawId, item.name);
+              }}
             />
           )}
           ListEmptyComponent={
-            isSearching ? (
+            isPending || isSearching ? (
               <View style={styles.center}>
                 <ActivityIndicator size="large" color={colors.red} />
                 <Text style={styles.loadingText}>Buscando Pokemon...</Text>

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { pokemonRepository, PokemonRef } from '../../../core/repositories/pokemonRepository';
+import { pokemonKeys, CACHE_TIMES } from '../../../core/queryKeys';
 
 /**
  * Fetches the complete Pokémon index (IDs + names).
@@ -7,9 +8,8 @@ import { pokemonRepository, PokemonRef } from '../../../core/repositories/pokemo
  */
 export function usePokemonIndex() {
   return useQuery<PokemonRef[]>({
-    queryKey: ['pokemon-index'],
+    queryKey: pokemonKeys.index,
     queryFn: () => pokemonRepository.getAllRefs(),
-    staleTime: 1000 * 60 * 30, // 30 min
-    gcTime: 1000 * 60 * 60,    // 1 hour
+    ...CACHE_TIMES.index,
   });
 }

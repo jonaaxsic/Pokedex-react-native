@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,7 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Animated,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pokemon } from '../../../core/models/Pokemon';
@@ -23,44 +21,6 @@ interface Props {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function PokemonDetailModal({ pokemon, visible, onClose }: Props) {
-  const scaleAnim = useRef(new Animated.Value(0.3)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible && pokemon) {
-      scaleAnim.setValue(0.3);
-      opacityAnim.setValue(0);
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 65,
-          friction: 9,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible, pokemon]);
-
-  const handleClose = () => {
-    Animated.parallel([
-      Animated.timing(scaleAnim, {
-        toValue: 0.3,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => onClose());
-  };
-
   if (!pokemon) return null;
 
   const mainType = pokemon.types[0];
@@ -70,39 +30,33 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
   const totalStats = pokemon.stats.reduce((sum, s) => sum + s.value, 0);
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
-        onPress={handleClose}
+        onPress={onClose}
+        accessibilityLabel={`Detalle de ${pokemon.name}`}
       >
-        <Animated.View
-          style={[
-            styles.card,
-            {
-              backgroundColor: bgColor,
-              transform: [{ scale: scaleAnim }],
-              opacity: opacityAnim,
-            },
-          ]}
+        <View
+          style={[styles.card, { backgroundColor: bgColor }]}
           onStartShouldSetResponder={() => true}
         >
           {/* Close button */}
-          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose} accessibilityLabel="Cerrar detalle" accessibilityRole="button">
             <Ionicons name="close" size={20} color={textColor} />
           </TouchableOpacity>
 
           {/* Pokemon ID */}
           <Text style={[styles.pokemonId, { color: textColor }]}>{pokemon.id}</Text>
 
-          {/* Pokemon Image - mas compacto */}
+          {/* Pokemon Image */}
           <Image
             source={{ uri: pokemon.image }}
             style={styles.pokemonImage}
             resizeMode="contain"
           />
 
-          {/* Pokemon Name + Types en la misma zona */}
+          {/* Pokemon Name + Types */}
           <Text style={[styles.pokemonName, { color: textColor }]}>{pokemon.name}</Text>
           <View style={styles.typesRow}>
             {pokemon.types.map((type) => (
@@ -112,7 +66,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             ))}
           </View>
 
-          {/* Info Row - compacto */}
+          {/* Info Row */}
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={[styles.infoValue, { color: textColor }]}>{pokemon.height}m</Text>
@@ -130,7 +84,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             </View>
           </View>
 
-          {/* Stats - grid 2x3 sin scroll */}
+          {/* Stats - grid 2x3 */}
           <View style={styles.statsGrid}>
             {pokemon.stats.map((stat) => (
               <View key={stat.name} style={styles.statItem}>
@@ -151,7 +105,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
             ))}
           </View>
 
-          {/* Moves - compacto, max 2 filas */}
+          {/* Moves */}
           <View style={styles.movesSection}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Movimientos</Text>
             <View style={styles.movesContainer}>
@@ -162,7 +116,7 @@ export default function PokemonDetailModal({ pokemon, visible, onClose }: Props)
               ))}
             </View>
           </View>
-        </Animated.View>
+        </View>
       </TouchableOpacity>
     </Modal>
   );
@@ -184,10 +138,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    boxShadow: '0px 8px 32px rgba(0,0,0,0.3)',
     elevation: 12,
   },
   closeButton: {
@@ -264,7 +215,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginTop: 1,
   },
-  // Stats en grid 2x3 - sin scroll
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -298,7 +248,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     opacity: 0.8,
   },
-  // Moves compactos
   movesSection: {
     width: '100%',
   },

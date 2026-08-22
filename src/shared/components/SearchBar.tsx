@@ -49,7 +49,7 @@ export default function SearchBar({ value, onChangeText }: Props) {
             styles.input,
             isFocused && styles.inputFocused,
           ]}
-          placeholder="Buscar Pokémon..."
+          placeholder="Buscar Pokemon..."
           placeholderTextColor="#9CA3AF"
           value={value}
           onChangeText={onChangeText}
@@ -59,6 +59,8 @@ export default function SearchBar({ value, onChangeText }: Props) {
           autoCorrect={false}
           returnKeyType="search"
           selectionColor="#6B7280"
+          accessibilityLabel="Buscar Pokemon"
+          accessibilityHint="Escribe el nombre o numero de un Pokemon"
           {...Platform.select({ web: { outlineStyle: 'none', outlineColor: 'transparent' } })}
         />
 
